@@ -19,7 +19,7 @@ BaselineOfCasinoSwingImporter >> defineDependencies: spec [
 	spec
 		baseline: 'BLToolkit'
 		with: [ spec
-				loads: 'core-extented';
+				loads: 'importer-java';
 				repository: 'github://badetitou/BL-Toolkit:master/src' ]
 ]
 
