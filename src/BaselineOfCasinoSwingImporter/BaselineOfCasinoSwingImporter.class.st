@@ -1,6 +1,6 @@
 Class {
 	#name : #BaselineOfCasinoSwingImporter,
-	#superclass : #Object,
+	#superclass : #BaselineOf,
 	#category : #BaselineOfCasinoSwingImporter
 }
 
