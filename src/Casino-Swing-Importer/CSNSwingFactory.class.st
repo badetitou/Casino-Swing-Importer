@@ -25,7 +25,7 @@ CSNSwingFactory >> createWidgetFromSwingInvocation: anInvocation [
 	widget := (BLWidget createWidgetFromSwingInvocation: anInvocation).
 	widget affectedActions: anInvocation affectation;
 		realClass: anInvocation invokedClass;
-		name: anInvocation signature asString;
+		name: (widget affectedActions ifNil: [anInvocation signature asString] ifNotNil: [widget affectedActions isAccess ifTrue: [widget affectedActions to name] ifFalse: [widget affectedActions name]]);
 		source: anInvocation.
 	^ self model silentlyAdd: widget
 ]
