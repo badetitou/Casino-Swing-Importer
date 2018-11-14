@@ -7,14 +7,30 @@ Class {
 { #category : #api }
 CSNSwingImporter >> completeWidget: widget [
 	"add the leaf to the widget"
-	"self haltIf: [ widget variable name = 'analyzerPanel' ]."
+	
 	widget
+		addAllWidgets:
+			(((self computeOutgoingAddInvocationForWidget: widget)
+				collect: [ :invoc | self searchWidgetFromAddInvocation: invoc ]) reject: #isNil)
+	
+	"widget
 		addAllWidgets:
 			((widget variable receivingInvocations
 				select: [ :invoc | 
 					#('add(' 'setViewportView(')
 						anySatisfy: [ :addMethodString | invoc signature beginsWith: addMethodString ] ]
-				thenCollect: [ :invoc | self searchWidgetFromAddInvocation: invoc ]) reject: #isNil)
+				thenCollect: [ :invoc | self searchWidgetFromAddInvocation: invoc ]) reject: #isNil)"
+]
+
+{ #category : #api }
+CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [ 
+	| invocations |
+	"self haltIf: [ aPage name = 'cfm' ]."
+	invocations := OrderedCollection new.
+	invocations addAll: aWidget source to first outgoingInvocations.
+	invocations addAll: (aWidget source to first classes collect: #outgoingInvocations).
+	aWidget variable ifNotNil: [ :variable | invocations addAll: variable receivingInvocations ].
+	^ (invocations flattened select: [ :receivingInvocation | #('add(' 'setViewportView(' ) anySatisfy: [ :keyword | receivingInvocation signature beginsWith: keyword ] ])
 ]
 
 { #category : #api }
@@ -62,7 +78,7 @@ CSNSwingImporter >> import [
 
 { #category : #api }
 CSNSwingImporter >> searchInstatiateVariable: var [
-	| listOfinvocation | 
+	| listOfinvocation |
 	listOfinvocation := ((var incomingAccesses select: #isWrite)
 		flatCollect: [ :access | 
 			access from outgoingInvocations
@@ -70,11 +86,11 @@ CSNSwingImporter >> searchInstatiateVariable: var [
 					access sourceAnchor startPos < invoc sourceAnchor startPos
 						and: [ access sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ]).
 	listOfinvocation 
-		ifEmpty: [ listOfinvocation :=var parentBehaviouralEntity outgoingInvocations select: [ :invoc | 
-					var sourceAnchor startPos < invoc sourceAnchor startPos
-						and: [ var sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ].
+		ifEmpty: [ listOfinvocation := var parentBehaviouralEntity outgoingInvocations select: [ :invoc | 
+					(var sourceAnchor startPos < invoc sourceAnchor startPos
+						and: [ var sourceAnchor endPos + 5 > invoc sourceAnchor startPos ]) and: [ invoc to first isConstructor ] ] ].
 	listOfinvocation ifEmpty: [ ^ nil ]
-		ifNotEmpty: [  ^ listOfinvocation first ]	""
+		ifNotEmpty: [  ^ listOfinvocation first ]
 ]
 
 { #category : #api }
