@@ -7,11 +7,13 @@ Class {
 { #category : #api }
 CSNSwingImporter >> completeWidget: widget [
 	"add the leaf to the widget"
-
+	"self haltIf: [ widget variable name = 'analyzerPanel' ]."
 	widget
 		addAllWidgets:
 			((widget variable receivingInvocations
-				select: [ :invoc | #('add(' 'setViewportView(') anySatisfy: [ :addMethodString | invoc signature beginsWith: addMethodString ] ]
+				select: [ :invoc | 
+					#('add(' 'setViewportView(')
+						anySatisfy: [ :addMethodString | invoc signature beginsWith: addMethodString ] ]
 				thenCollect: [ :invoc | self searchWidgetFromAddInvocation: invoc ]) reject: #isNil)
 ]
 
@@ -54,14 +56,19 @@ CSNSwingImporter >> import [
 
 { #category : #api }
 CSNSwingImporter >> searchInstatiateVariable: var [
-	^ ((var incomingAccesses select: #isWrite)
+	| listOfinvocation | 
+	listOfinvocation := ((var incomingAccesses select: #isWrite)
 		flatCollect: [ :access | 
 			access from outgoingInvocations
 				select: [ :invoc | 
 					access sourceAnchor startPos < invoc sourceAnchor startPos
-						and: [ access sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ])
-		ifEmpty: [ nil ]
-		ifNotEmpty: [ :listOfinvocation | listOfinvocation first ]
+						and: [ access sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ]).
+	listOfinvocation 
+		ifEmpty: [ listOfinvocation :=var parentBehaviouralEntity outgoingInvocations select: [ :invoc | 
+					var sourceAnchor startPos < invoc sourceAnchor startPos
+						and: [ var sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ].
+	listOfinvocation ifEmpty: [ ^ nil ]
+		ifNotEmpty: [  ^ listOfinvocation first ]	""
 ]
 
 { #category : #api }
@@ -74,7 +81,8 @@ CSNSwingImporter >> searchWidgetFromAddInvocation: invocation [
 		ifAbsent: [ Exception signal: 'no parameter to find the added widget' ].
 	var := invocation from localVariables select: [ :variable | variable name = param ].
 	var
-		ifEmpty: [ var := invocation from parentType attributes select: [ :attribute | attribute name = param ] ].
+		ifEmpty: [ var := invocation from parentType attributes
+				select: [ :attribute | attribute name = param ] ].
 	var
 		ifNotEmpty: [ "the added widget is a variable from somewhere else"
 			| instanciationInvoc |
