@@ -21,5 +21,8 @@ CSNSwingFactory >> createPageFromInvocation: anInvocation [
 
 { #category : #'as yet unclassified' }
 CSNSwingFactory >> createWidgetFromSwingInvocation: anObject [
-	^ self model silentlyAdd: (BLWidget createWidgetFromSwingInvocation: anObject)
+	| widget |
+	widget := (BLWidget createWidgetFromSwingInvocation: anObject).
+	widget affectedActions: anObject affectation.
+	^ self model silentlyAdd: widget
 ]

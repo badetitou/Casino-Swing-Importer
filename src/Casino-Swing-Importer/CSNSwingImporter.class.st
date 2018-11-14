@@ -5,6 +5,13 @@ Class {
 }
 
 { #category : #api }
+CSNSwingImporter >> completeWidget: widget [
+	"add the leaf to the widget"
+	widget addAllWidgets: (((widget variable receivingInvocations select: [:invoc | invoc signature beginsWith: 'add('] thenCollect: [:invoc | self searchWidgetFromAddInvocation: invoc])) reject: #isNil).
+	
+]
+
+{ #category : #api }
 CSNSwingImporter >> createAllPages [
 	(self sourceModel select: [ :a | a name = 'JFrame' ]) first withSubclassHierarchy
 		do: [ :jFrameSubclass | 
@@ -63,13 +70,14 @@ CSNSwingImporter >> searchWidgetFromAddInvocation: invocation [
 		ifAbsent: [ Exception signal: 'no parameter to find the added widget' ].
 	var := invocation from localVariables select: [ :variable | variable name = param ].
 	var
-		ifEmpty: [ var := invocation from parentType attributes
-				select: [ :attribute | attribute name = param ] ].
+		ifEmpty: [ var := invocation from parentType attributes select: [ :attribute | attribute name = param ] ].
 	var
 		ifNotEmpty: [ "the added widget is a variable from somewhere else"
 			| instanciationInvoc |
 			instanciationInvoc := self searchInstatiateVariable: var first.
+			instanciationInvoc ifNil: [ ^ nil ].
 			widget := self factory createWidgetFromSwingInvocation: instanciationInvoc.
-			widget isContainer ifTrue: [ "repeat the research" ] ].
+			widget isContainer
+				ifTrue: [ self completeWidget: widget ] ].
 	^ widget
 ]

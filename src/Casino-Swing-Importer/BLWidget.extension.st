@@ -5,7 +5,7 @@ BLWidget class >> createWidgetFromSwingInvocation: anInvocation [
 	| class |
 	class := self allSubclasses
 		detect: [ :first | first swingCanHandle: anInvocation ]
-		ifNone: [ ^ nil ].
+		ifNone: [ ^ BLUIContainer new ].
 	^ class newSwingInstanceFor: anInvocation
 ]
 
