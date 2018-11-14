@@ -30,7 +30,7 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 	invocations addAll: aWidget source to first outgoingInvocations.
 	invocations addAll: (aWidget source to first classes collect: #outgoingInvocations).
 	aWidget variable ifNotNil: [ :variable | invocations addAll: variable receivingInvocations ].
-	^ (invocations flattened select: [ :receivingInvocation | #('add(' 'setViewportView(' ) anySatisfy: [ :keyword | receivingInvocation signature beginsWith: keyword ] ])
+	^ (invocations flattened select: [ :receivingInvocation | #('add(' 'setViewportView(' 'setContentPane' ) anySatisfy: [ :keyword | receivingInvocation signature beginsWith: keyword ] ])
 ]
 
 { #category : #api }
@@ -51,18 +51,7 @@ CSNSwingImporter >> createFactory [
 
 { #category : #api }
 CSNSwingImporter >> generatePage: aPage [
-	| invocations |
-	"self haltIf: [ aPage name = 'cfm' ]."
-	invocations := OrderedCollection new.
-	(aPage source invokedClass superclassHierarchy anySatisfy: [:class | class name = 'JFrame']) ifTrue: [
-		invocations addAll: aPage source to first outgoingInvocations.
-		invocations addAll: (aPage source to first classes collect: #outgoingInvocations).
-		].
-	invocations addAll: (aPage variable
-		ifNotNil: [ :variable | 
-			variable receivingInvocations ]
-		ifNil: [ "The page is instanciate inside a method... Maybe looking for as the page is the attribute of the invoked method ?" self flag: #todo.{} ]).
-	(invocations flattened select: [ :receivingInvocation | #('setContentPane' 'add(') anySatisfy: [ :keyword | receivingInvocation signature beginsWith: keyword ] ]) do: [ :invocation | aPage addWidget: (self searchWidgetFromAddInvocation: invocation) withInvocationOfAdd: invocation ]
+	self completeWidget: aPage
 ]
 
 { #category : #api }
@@ -78,7 +67,7 @@ CSNSwingImporter >> import [
 
 { #category : #api }
 CSNSwingImporter >> searchInstatiateVariable: var [
-	| listOfinvocation |
+	| listOfinvocation | 
 	listOfinvocation := ((var incomingAccesses select: #isWrite)
 		flatCollect: [ :access | 
 			access from outgoingInvocations
@@ -86,9 +75,9 @@ CSNSwingImporter >> searchInstatiateVariable: var [
 					access sourceAnchor startPos < invoc sourceAnchor startPos
 						and: [ access sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ]).
 	listOfinvocation 
-		ifEmpty: [ listOfinvocation := var parentBehaviouralEntity outgoingInvocations select: [ :invoc | 
-					(var sourceAnchor startPos < invoc sourceAnchor startPos
-						and: [ var sourceAnchor endPos + 5 > invoc sourceAnchor startPos ]) and: [ invoc to first isConstructor ] ] ].
+		ifEmpty: [ listOfinvocation :=var parentBehaviouralEntity outgoingInvocations select: [ :invoc | 
+					var sourceAnchor startPos < invoc sourceAnchor startPos
+						and: [ var sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ].
 	listOfinvocation ifEmpty: [ ^ nil ]
 		ifNotEmpty: [  ^ listOfinvocation first ]
 ]
