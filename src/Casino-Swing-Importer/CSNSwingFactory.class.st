@@ -15,14 +15,17 @@ CSNSwingFactory >> createPageFromInvocation: anInvocation [
 		name:
 			((page variable
 				ifNotNil: [ :var |  var receivingInvocations select: [ :invoc | invoc signature beginsWith: 'setTitle' ] ]
-				ifNil: [ {} ]) ifEmpty: [ nil ] ifNotEmpty: [ :listInvocSetTitle | listInvocSetTitle first parameters first ]).
+				ifNil: [ {} ]) ifEmpty: [ anInvocation parameters at:1 ifAbsent: [ nil ] ] ifNotEmpty: [ :listInvocSetTitle | listInvocSetTitle first parameters first ]).
 	self model silentlyAdd: page
 ]
 
 { #category : #'as yet unclassified' }
-CSNSwingFactory >> createWidgetFromSwingInvocation: anObject [
+CSNSwingFactory >> createWidgetFromSwingInvocation: anInvocation [
 	| widget |
-	widget := (BLWidget createWidgetFromSwingInvocation: anObject).
-	widget affectedActions: anObject affectation.
+	widget := (BLWidget createWidgetFromSwingInvocation: anInvocation).
+	widget affectedActions: anInvocation affectation;
+		realClass: anInvocation invokedClass;
+		name: anInvocation signature asString;
+		source: anInvocation.
 	^ self model silentlyAdd: widget
 ]

@@ -19,7 +19,7 @@ CSNSwingImporter >> completeWidget: widget [
 
 { #category : #api }
 CSNSwingImporter >> createAllPages [
-	(self sourceModel select: [ :a | a name = 'JFrame' ]) first withSubclassHierarchy
+	(self sourceModel allClasses select: [ :a | a name = 'JFrame' ]) first withSubclassHierarchy
 		do: [ :jFrameSubclass | 
 			jFrameSubclass constructors
 				do: [ :constructor | 
@@ -35,12 +35,18 @@ CSNSwingImporter >> createFactory [
 
 { #category : #api }
 CSNSwingImporter >> generatePage: aPage [
-	aPage variable
+	| invocations |
+	"self haltIf: [ aPage name = 'cfm' ]."
+	invocations := OrderedCollection new.
+	(aPage source invokedClass superclassHierarchy anySatisfy: [:class | class name = 'JFrame']) ifTrue: [
+		invocations addAll: aPage source to first outgoingInvocations.
+		invocations addAll: (aPage source to first classes collect: #outgoingInvocations).
+		].
+	invocations addAll: (aPage variable
 		ifNotNil: [ :variable | 
-			variable receivingInvocations
-				select: [ :receivingInvocation | receivingInvocation signature beginsWith: 'setContentPane' ]
-				thenDo: [ :invocation | aPage addWidget: (self searchWidgetFromAddInvocation: invocation) withInvocationOfAdd: invocation ] ]
-		ifNil: [ "The page is instanciate inside a method... Maybe looking for as the page is the attribute of the invoked method ?" self flag: #todo ]
+			variable receivingInvocations ]
+		ifNil: [ "The page is instanciate inside a method... Maybe looking for as the page is the attribute of the invoked method ?" self flag: #todo.{} ]).
+	(invocations flattened select: [ :receivingInvocation | #('setContentPane' 'add(') anySatisfy: [ :keyword | receivingInvocation signature beginsWith: keyword ] ]) do: [ :invocation | aPage addWidget: (self searchWidgetFromAddInvocation: invocation) withInvocationOfAdd: invocation ]
 ]
 
 { #category : #api }
@@ -76,13 +82,22 @@ CSNSwingImporter >> searchWidgetFromAddInvocation: invocation [
 	"search the widget added "
 
 	| param var widget |
+	
 	param := invocation parameters
 		at: 1
 		ifAbsent: [ Exception signal: 'no parameter to find the added widget' ].
 	var := invocation from localVariables select: [ :variable | variable name = param ].
 	var
-		ifEmpty: [ var := invocation from parentType attributes
-				select: [ :attribute | attribute name = param ] ].
+		ifEmpty: [ 
+			| possibleAttributes tmpClass |
+			possibleAttributes := invocation from parentType attributes asOrderedCollection.
+			tmpClass := invocation from parentType.
+			[ tmpClass isInnerClass ] whileTrue: [ tmpClass := tmpClass belongsTo belongsTo.
+			possibleAttributes addAll: tmpClass attributes ].
+			var := possibleAttributes
+				select: [ :attribute | attribute name = param ].
+				 ].
+
 	var
 		ifNotEmpty: [ "the added widget is a variable from somewhere else"
 			| instanciationInvoc |
