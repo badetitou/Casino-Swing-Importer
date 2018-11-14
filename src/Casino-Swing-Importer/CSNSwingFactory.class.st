@@ -18,3 +18,8 @@ CSNSwingFactory >> createPageFromInvocation: anInvocation [
 				ifNil: [ {} ]) ifEmpty: [ nil ] ifNotEmpty: [ :listInvocSetTitle | listInvocSetTitle first parameters first ]).
 	self model silentlyAdd: page
 ]
+
+{ #category : #'as yet unclassified' }
+CSNSwingFactory >> createWidgetFromSwingInvocation: anObject [
+	^ self model silentlyAdd: (BLWidget createWidgetFromSwingInvocation: anObject)
+]

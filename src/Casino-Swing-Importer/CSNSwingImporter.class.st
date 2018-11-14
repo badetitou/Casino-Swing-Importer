@@ -23,10 +23,10 @@ CSNSwingImporter >> createFactory [
 { #category : #api }
 CSNSwingImporter >> generatePage: aPage [
 	aPage variable
-		ifNotNil: [ :variable |
+		ifNotNil: [ :variable | 
 			variable receivingInvocations
 				select: [ :receivingInvocation | receivingInvocation signature beginsWith: 'setContentPane' ]
-				thenCollect: [ :invocation | self searchWidgetFromAddInvocation: invocation ] ]
+				thenDo: [ :invocation | aPage addWidget: (self searchWidgetFromAddInvocation: invocation) withInvocationOfAdd: invocation ] ]
 		ifNil: [ "The page is instanciate inside a method... Maybe looking for as the page is the attribute of the invoked method ?" self flag: #todo ]
 ]
 
@@ -43,20 +43,33 @@ CSNSwingImporter >> import [
 
 { #category : #api }
 CSNSwingImporter >> searchInstatiateVariable: var [
-	var.
-	self halt
+	^ ((var incomingAccesses select: #isWrite)
+		flatCollect: [ :access | 
+			access from outgoingInvocations
+				select: [ :invoc | 
+					access sourceAnchor startPos < invoc sourceAnchor startPos
+						and: [ access sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ])
+		ifEmpty: [ nil ]
+		ifNotEmpty: [ :listOfinvocation | listOfinvocation first ]
 ]
 
 { #category : #api }
 CSNSwingImporter >> searchWidgetFromAddInvocation: invocation [
 	"search the widget added "
-	| param var widget | 
-	param := invocation parameters at: 1 ifAbsent: [ Exception signal: 'no parameter to find the added widget' ].
+
+	| param var widget |
+	param := invocation parameters
+		at: 1
+		ifAbsent: [ Exception signal: 'no parameter to find the added widget' ].
 	var := invocation from localVariables select: [ :variable | variable name = param ].
-	var ifEmpty: [ var := invocation from parentType attributes select: [ :attribute | attribute name = param ] ].
-	var ifNotEmpty: [ "the added widget is a variable from somewhere else"
-		self searchInstatiateVariable: var first.
-		var .self halt.  ].
+	var
+		ifEmpty: [ var := invocation from parentType attributes
+				select: [ :attribute | attribute name = param ] ].
+	var
+		ifNotEmpty: [ "the added widget is a variable from somewhere else"
+			| instanciationInvoc |
+			instanciationInvoc := self searchInstatiateVariable: var first.
+			widget := self factory createWidgetFromSwingInvocation: instanciationInvoc.
+			widget isContainer ifTrue: [ "repeat the research" ] ].
 	^ widget
-	
 ]
