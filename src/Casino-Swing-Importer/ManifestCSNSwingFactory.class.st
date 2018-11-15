@@ -6,6 +6,7 @@ MooseModel resetRoot.
 swingModel := MooseModel new.
 CSNSwingImporter new sourceModel: mooseModel; createModelIn: swingModel.
 swingModel name: 'RCA'.
+swingModel.
 "
 Class {
 	#name : #ManifestCSNSwingFactory,

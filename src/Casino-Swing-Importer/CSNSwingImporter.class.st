@@ -7,12 +7,11 @@ Class {
 { #category : #api }
 CSNSwingImporter >> completeWidget: widget [
 	"add the leaf to the widget"
-	
 	widget
 		addAllWidgets:
 			(((self computeOutgoingAddInvocationForWidget: widget)
 				collect: [ :invoc | self searchWidgetFromAddInvocation: invoc ]) reject: #isNil)
-	
+
 	"widget
 		addAllWidgets:
 			((widget variable receivingInvocations
@@ -23,14 +22,27 @@ CSNSwingImporter >> completeWidget: widget [
 ]
 
 { #category : #api }
-CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [ 
-	| invocations |
-	"self haltIf: [ aPage name = 'cfm' ]."
+CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
+	| invocations exploreLocalMethod |
 	invocations := OrderedCollection new.
 	invocations addAll: aWidget source to first outgoingInvocations.
+	exploreLocalMethod := invocations copy.
+	[ exploreLocalMethod isNotEmpty ]
+		whileTrue: [ invocations
+				addAll:
+					((exploreLocalMethod flatCollect: [ :invoc | invoc to first outgoingInvocations ]) select:
+					[ :invoc | invoc to first = aWidget source to first ]).
+			exploreLocalMethod := (exploreLocalMethod
+				flatCollect: [ :invoc | invoc to first outgoingInvocations ])
+				select:
+					[ :invoc | invoc to first = aWidget source to first ] ].
 	invocations addAll: (aWidget source to first classes collect: #outgoingInvocations).
-	aWidget variable ifNotNil: [ :variable | invocations addAll: variable receivingInvocations ].
-	^ (invocations flattened select: [ :receivingInvocation | #('add(' 'setViewportView(' 'setContentPane' ) anySatisfy: [ :keyword | receivingInvocation signature beginsWith: keyword ] ])
+	aWidget variable
+		ifNotNil: [ :variable | invocations addAll: variable receivingInvocations ].
+	^ invocations flattened
+		select: [ :receivingInvocation | 
+			#('add(' 'setViewportView(' 'setContentPane')
+				anySatisfy: [ :keyword | receivingInvocation signature beginsWith: keyword ] ]
 ]
 
 { #category : #api }
@@ -67,19 +79,31 @@ CSNSwingImporter >> import [
 
 { #category : #api }
 CSNSwingImporter >> searchInstatiateVariable: var [
-	| listOfinvocation | 
-	listOfinvocation := ((var incomingAccesses select: #isWrite)
+	| listOfinvocation |
+	listOfinvocation := (var incomingAccesses select: #isWrite)
 		flatCollect: [ :access | 
 			access from outgoingInvocations
 				select: [ :invoc | 
 					access sourceAnchor startPos < invoc sourceAnchor startPos
-						and: [ access sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ]).
-	listOfinvocation 
-		ifEmpty: [ listOfinvocation :=var parentBehaviouralEntity outgoingInvocations select: [ :invoc | 
+						and:
+							[ access sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ].
+	"If attribute, check if the instaciation is made directly and not inside the constructor"
+	(listOfinvocation isEmpty and: [ var isAttribute ])
+		ifTrue: [ listOfinvocation := (var parentType outgoingInvocations
+				select: [ :invoc | 
+					invoc from isInstanciationInitializer
+						and: [ var sourceAnchor startPos < invoc sourceAnchor startPos
+								and:
+									[ var sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ])
+				asOrderedCollection ].
+	"We don't have access to the write accesses... so we try to find directly inside the method"
+	listOfinvocation
+		ifEmpty: [ listOfinvocation := var parentBehaviouralEntity outgoingInvocations
+				select: [ :invoc | 
 					var sourceAnchor startPos < invoc sourceAnchor startPos
-						and: [ var sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ].
-	listOfinvocation ifEmpty: [ ^ nil ]
-		ifNotEmpty: [  ^ listOfinvocation first ]
+						and:
+							[ var sourceAnchor endPos + 5 > invoc sourceAnchor startPos ] ] ].
+	listOfinvocation ifEmpty: [ ^ nil ] ifNotEmpty: [ ^ (listOfinvocation select: [ :invoc | invoc to first isConstructor ]) first ]
 ]
 
 { #category : #api }
@@ -87,22 +111,18 @@ CSNSwingImporter >> searchWidgetFromAddInvocation: invocation [
 	"search the widget added "
 
 	| param var widget |
-	
 	param := invocation parameters
 		at: 1
 		ifAbsent: [ Exception signal: 'no parameter to find the added widget' ].
 	var := invocation from localVariables select: [ :variable | variable name = param ].
 	var
-		ifEmpty: [ 
-			| possibleAttributes tmpClass |
+		ifEmpty: [ | possibleAttributes tmpClass |
 			possibleAttributes := invocation from parentType attributes asOrderedCollection.
 			tmpClass := invocation from parentType.
-			[ tmpClass isInnerClass ] whileTrue: [ tmpClass := tmpClass belongsTo belongsTo.
-			possibleAttributes addAll: tmpClass attributes ].
-			var := possibleAttributes
-				select: [ :attribute | attribute name = param ].
-				 ].
-
+			[ tmpClass isInnerClass ]
+				whileTrue: [ tmpClass := tmpClass belongsTo belongsTo.
+					possibleAttributes addAll: tmpClass attributes ].
+			var := possibleAttributes select: [ :attribute | attribute name = param ] ].
 	var
 		ifNotEmpty: [ "the added widget is a variable from somewhere else"
 			| instanciationInvoc |
