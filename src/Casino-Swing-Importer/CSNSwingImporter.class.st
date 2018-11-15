@@ -26,22 +26,22 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 	| invocations exploreLocalMethod |
 	invocations := OrderedCollection new.
 	invocations addAll: aWidget source to first outgoingInvocations.
+	invocations addAll: (aWidget source to first classes collect: #outgoingInvocations) flatten.
 	exploreLocalMethod := invocations copy.
 	[ exploreLocalMethod isNotEmpty ]
 		whileTrue: [ invocations
 				addAll:
 					((exploreLocalMethod flatCollect: [ :invoc | invoc to first outgoingInvocations ]) select:
-					[ :invoc | invoc to first = aWidget source to first ]).
+					[ :invoc |  aWidget source to first belongsTo = invoc from belongsTo and: [ invoc receiver isNil or: [ invoc receiver isImplicitVariable ] ] ]).
 			exploreLocalMethod := (exploreLocalMethod
 				flatCollect: [ :invoc | invoc to first outgoingInvocations ])
 				select:
 					[ :invoc | invoc to first = aWidget source to first ] ].
-	invocations addAll: (aWidget source to first classes collect: #outgoingInvocations).
 	aWidget variable
 		ifNotNil: [ :variable | invocations addAll: variable receivingInvocations ].
 	^ invocations flattened
 		select: [ :receivingInvocation | 
-			#('add(' 'setViewportView(' 'setContentPane')
+			#('add(' 'setViewportView(' 'setContentPane' 'setJMenuBar')
 				anySatisfy: [ :keyword | receivingInvocation signature beginsWith: keyword ] ]
 ]
 
