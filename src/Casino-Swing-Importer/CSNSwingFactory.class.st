@@ -4,7 +4,7 @@ Class {
 	#category : #'Casino-Swing-Importer'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #factory }
 CSNSwingFactory >> createPageFromInvocation: anInvocation [
 	| page |
 	page := BLPage new
@@ -19,7 +19,7 @@ CSNSwingFactory >> createPageFromInvocation: anInvocation [
 	self model silentlyAdd: page
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #factory }
 CSNSwingFactory >> createWidgetFromSwingInvocation: anInvocation [
 	| widget |
 	widget := (BLWidget createWidgetFromSwingInvocation: anInvocation).
