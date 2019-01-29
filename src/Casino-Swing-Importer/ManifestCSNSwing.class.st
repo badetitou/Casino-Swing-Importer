@@ -9,7 +9,7 @@ swingModel name: 'RCA'.
 swingModel.
 "
 Class {
-	#name : #ManifestCSNSwingFactory,
+	#name : #ManifestCSNSwing,
 	#superclass : #PackageManifest,
 	#category : #'Casino-Swing-Importer'
 }
