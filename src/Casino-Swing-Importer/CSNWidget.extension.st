@@ -1,20 +1,20 @@
-Extension { #name : #BLWidget }
+Extension { #name : #CSNWidget }
 
 { #category : #'*Casino-Swing-Importer' }
-BLWidget class >> createWidgetFromSwingInvocation: anInvocation [
+CSNWidget class >> createWidgetFromSwingInvocation: anInvocation [
 	| class |
 	class := self allSubclasses
 		detect: [ :first | first swingCanHandle: anInvocation ]
-		ifNone: [ ^ BLUIContainer new ].
+		ifNone: [ ^ CSNUIContainer new ].
 	^ class newSwingInstanceFor: anInvocation
 ]
 
 { #category : #'*Casino-Swing-Importer' }
-BLWidget class >> newSwingInstanceFor: anInvocation [
+CSNWidget class >> newSwingInstanceFor: anInvocation [
 	^ self new
 ]
 
 { #category : #'*Casino-Swing-Importer' }
-BLWidget class >> swingCanHandle: anInvocation [
+CSNWidget class >> swingCanHandle: anInvocation [
 	^ false
 ]

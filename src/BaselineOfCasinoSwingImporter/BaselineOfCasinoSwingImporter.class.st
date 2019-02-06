@@ -17,10 +17,10 @@ BaselineOfCasinoSwingImporter >> baseline: spec [
 { #category : #baselines }
 BaselineOfCasinoSwingImporter >> defineDependencies: spec [
 	spec
-		baseline: 'BLToolkit'
+		baseline: 'Casino'
 		with: [ spec
 				loads: 'importer-java';
-				repository: 'github://badetitou/BL-Toolkit:master/src' ]
+				repository: 'github://badetitou/Casino:master/src' ]
 ]
 
 { #category : #baselines }
@@ -33,5 +33,5 @@ BaselineOfCasinoSwingImporter >> definePackages: spec [
 	spec
 		repository: 'https://github.com/badetitou/Casino-Swing-Importer';
 		package: 'BaselineOfCasinoSwingImporter';
-		package: 'Casino-Swing-Importer' with: [ spec requires: #('BLToolkit') ]
+		package: 'Casino-Swing-Importer' with: [ spec requires: #('Casino') ]
 ]

@@ -1,6 +1,6 @@
-Extension { #name : #BLUITextarea }
+Extension { #name : #CSNUITextarea }
 
 { #category : #'*Casino-Swing-Importer' }
-BLUITextarea class >> swingCanHandle: anInvocation [
+CSNUITextarea class >> swingCanHandle: anInvocation [
 	^ 'JTextArea' = anInvocation invokedClassName
 ]

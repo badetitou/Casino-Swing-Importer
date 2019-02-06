@@ -1,6 +1,6 @@
-Extension { #name : #BLUIInputText }
+Extension { #name : #CSNUIInputText }
 
 { #category : #'*Casino-Swing-Importer' }
-BLUIInputText class >> swingCanHandle: anInvocation [
+CSNUIInputText class >> swingCanHandle: anInvocation [
 	^ 'JTextField' = anInvocation invokedClassName
 ]

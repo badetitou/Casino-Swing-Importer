@@ -1,6 +1,6 @@
-Extension { #name : #BLUISelect }
+Extension { #name : #CSNUISelect }
 
 { #category : #'*Casino-Swing-Importer' }
-BLUISelect class >> swingCanHandle: anInvocation [
+CSNUISelect class >> swingCanHandle: anInvocation [
 	^ 'JComboBox' = anInvocation invokedClassName
 ]

@@ -1,6 +1,6 @@
-Extension { #name : #BLUIInputFile }
+Extension { #name : #CSNUIInputFile }
 
 { #category : #'*Casino-Swing-Importer' }
-BLUIInputFile class >> swingCanHandle: anInvocation [
+CSNUIInputFile class >> swingCanHandle: anInvocation [
 	^ 'JFileChooser' = anInvocation invokedClassName
 ]

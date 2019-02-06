@@ -1,6 +1,6 @@
-Extension { #name : #BLUIPanel }
+Extension { #name : #CSNUIPanel }
 
 { #category : #'*Casino-Swing-Importer' }
-BLUIPanel class >> swingCanHandle: anInvocation [
+CSNUIPanel class >> swingCanHandle: anInvocation [
 	^ #('JPanel' 'JScrollPane') includes: anInvocation invokedClassName
 ]

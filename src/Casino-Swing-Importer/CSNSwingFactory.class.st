@@ -1,13 +1,13 @@
 Class {
 	#name : #CSNSwingFactory,
-	#superclass : #BLWidgetFactory,
+	#superclass : #CSNWidgetFactory,
 	#category : #'Casino-Swing-Importer'
 }
 
 { #category : #factory }
 CSNSwingFactory >> createPageFromInvocation: anInvocation [
 	| page |
-	page := BLPage new
+	page := CSNPage new
 		affectedActions: anInvocation affectation;
 		source: anInvocation;
 		yourself.
@@ -22,7 +22,7 @@ CSNSwingFactory >> createPageFromInvocation: anInvocation [
 { #category : #factory }
 CSNSwingFactory >> createWidgetFromSwingInvocation: anInvocation [
 	| widget |
-	widget := (BLWidget createWidgetFromSwingInvocation: anInvocation).
+	widget := (CSNWidget createWidgetFromSwingInvocation: anInvocation).
 	widget affectedActions: anInvocation affectation;
 		realClass: anInvocation invokedClass;
 		name: (widget affectedActions ifNil: [anInvocation signature asString] ifNotNil: [widget affectedActions isAccess ifTrue: [widget affectedActions to name] ifFalse: [widget affectedActions name]]);

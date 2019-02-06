@@ -1,6 +1,6 @@
-Extension { #name : #BLUIButton }
+Extension { #name : #CSNUIButton }
 
 { #category : #'*Casino-Swing-Importer' }
-BLUIButton class >> swingCanHandle: anInvocation [
+CSNUIButton class >> swingCanHandle: anInvocation [
 	^ 'JButton' = anInvocation invokedClassName
 ]

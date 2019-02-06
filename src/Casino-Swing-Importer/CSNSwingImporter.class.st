@@ -1,6 +1,6 @@
 Class {
 	#name : #CSNSwingImporter,
-	#superclass : #BLWebModel,
+	#superclass : #CSNWebModel,
 	#category : #'Casino-Swing-Importer'
 }
 
