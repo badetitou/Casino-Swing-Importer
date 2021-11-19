@@ -68,7 +68,8 @@ CSNSwingImporter >> generatePage: aPage [
 
 { #category : #api }
 CSNSwingImporter >> generateWidgets [
-	self model allBLPage do: [ :page | self generatePage: page ]
+
+	self model allCSNPage do: [ :page | self generatePage: page ]
 ]
 
 { #category : #api }

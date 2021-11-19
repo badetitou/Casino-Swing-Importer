@@ -5,7 +5,7 @@ CSNWidget class >> createWidgetFromSwingInvocation: anInvocation [
 	| class |
 	class := self allSubclasses
 		detect: [ :first | first swingCanHandle: anInvocation ]
-		ifNone: [ ^ CSNUIContainer new ].
+		ifNone: [ ^ CSNContainer new ].
 	^ class newSwingInstanceFor: anInvocation
 ]
 
