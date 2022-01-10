@@ -6,20 +6,13 @@ Class {
 
 { #category : #api }
 CSNSwingImporter >> completeWidget: widget [
-	"add the leaf to the widget"
-"	self halt. "
-	widget
-		addAllWidgets:
-			(((self computeOutgoingAddInvocationForWidget: widget)
-				collect: [ :invoc | self searchWidgetFromAddInvocation: invoc ]) reject: #isNil)
 
-	"widget
-		addAllWidgets:
-			((widget variable receivingInvocations
-				select: [ :invoc | 
-					#('add(' 'setViewportView(')
-						anySatisfy: [ :addMethodString | invoc signature beginsWith: addMethodString ] ]
-				thenCollect: [ :invoc | self searchWidgetFromAddInvocation: invoc ]) reject: #isNil)"
+	"add the leaf to the widget"
+
+	widget addAllWidgets:
+		(((self computeOutgoingAddInvocationForWidget: widget) collect: [ 
+			  :invoc | self searchWidgetFromAddInvocation: invoc ]) reject:
+			 #isNil)
 ]
 
 { #category : #api }
