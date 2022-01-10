@@ -17,7 +17,11 @@ CSNSwingModelImporterVisitor >> createWidget: aWidgetClass [
 CSNSwingModelImporterVisitor >> visitCSNUIButton: aCSNUIButton [
 
 	^ 'JButton' = source invokedClassName
-		  ifTrue: [ self createWidget: aCSNUIButton ]
+		  ifTrue: [ 
+			  (self createWidget: aCSNUIButton)
+				  addAttribute: ((self create: CSNUILabel) attributeValue:
+							   (source parameters at: 1 ifAbsent: [ '' ]));
+				  yourself ]
 		  ifFalse: [ nil ]
 ]
 
@@ -69,7 +73,11 @@ CSNSwingModelImporterVisitor >> visitCSNUIInputText: aCSNUIInputText [
 CSNSwingModelImporterVisitor >> visitCSNUIMenu: aCSNUIMenu [
 
 	^ 'JMenu' = source invokedClassName
-		  ifTrue: [ self createWidget: aCSNUIMenu ]
+		  ifTrue: [ 
+			  (self createWidget: aCSNUIMenu)
+				  addAttribute: ((self create: CSNUILabel) attributeValue:
+							   (source parameters at: 1 ifAbsent: [ '' ]));
+				  yourself ]
 		  ifFalse: [ nil ]
 ]
 
@@ -77,7 +85,11 @@ CSNSwingModelImporterVisitor >> visitCSNUIMenu: aCSNUIMenu [
 CSNSwingModelImporterVisitor >> visitCSNUIMenuItem: aCSNUIMenuItem [
 
 	^ 'JMenuItem' = source invokedClassName
-		  ifTrue: [ self createWidget: aCSNUIMenuItem ]
+		  ifTrue: [ 
+			  (self createWidget: aCSNUIMenuItem)
+				  addAttribute: ((self create: CSNUILabel) attributeValue:
+							   (source parameters at: 1 ifAbsent: [ '' ]));
+				  yourself ]
 		  ifFalse: [ nil ]
 ]
 
@@ -93,9 +105,13 @@ CSNSwingModelImporterVisitor >> visitCSNUIPanel: aCSNUIPanel [
 
 { #category : #visiting }
 CSNSwingModelImporterVisitor >> visitCSNUIParagraph: aCSNUIParagraph [
-	
+
 	^ 'JLabel' = source invokedClassName
-		  ifTrue: [ self createWidget: aCSNUIParagraph ]
+		  ifTrue: [ 
+			  (self createWidget: aCSNUIParagraph)
+				  addAttribute: ((self create: CSNUILabel) attributeValue:
+							   (source parameters at: 1 ifAbsent: [ '' ]));
+				  yourself ]
 		  ifFalse: [ nil ]
 ]
 
