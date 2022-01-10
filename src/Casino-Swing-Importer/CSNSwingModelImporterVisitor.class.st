@@ -7,10 +7,21 @@ Class {
 { #category : #visiting }
 CSNSwingModelImporterVisitor >> createWidget: aWidgetClass [
 
-	^ (self create: aWidgetClass)
-		  realClass: source invokedClass;
-		  addSource: source;
-		  yourself
+	| createdInstance |
+	createdInstance := (self create: aWidgetClass)
+		                   realClass: source invokedClass;
+		                   addSource: source;
+		                   yourself.
+	"test position for layout"
+	^ createdInstance
+]
+
+{ #category : #visiting }
+CSNSwingModelImporterVisitor >> visitCSNLBorderLayout: aCSNLBorderLayout [
+
+	^ 'BorderLayout' = source invokedClassName
+		  ifTrue: [ self create: CSNLBorderLayout ]
+		  ifFalse: [ nil ]
 ]
 
 { #category : #visiting }

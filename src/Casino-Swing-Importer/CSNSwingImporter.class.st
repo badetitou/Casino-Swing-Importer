@@ -9,14 +9,49 @@ CSNSwingImporter >> completeWidget: widget [
 
 	"add the leaf to the widget"
 
+	self computeLayoutOf: widget.
+	self computeChildrenOf: widget
+]
+
+{ #category : #private }
+CSNSwingImporter >> computeChildrenOf: widget [ 
 	widget addAllWidgets:
 		(((self computeOutgoingAddInvocationForWidget: widget) collect: [ 
 			  :invoc | self searchWidgetFromAddInvocation: invoc ]) reject:
 			 #isNil)
 ]
 
-{ #category : #api }
+{ #category : #private }
+CSNSwingImporter >> computeLayoutOf: widget [
+
+	| invocations |
+	invocations := self computeOutgoingInvocationForWidget: widget.
+
+	invocations
+		select: [ :receivingInvocation | 
+			#( 'setLayout' ) anySatisfy: [ :keyword | 
+				receivingInvocation signature beginsWith: keyword ] ]
+		thenDo: [ :invoc | 
+			| constructorInvoc |
+			invoc sender generateFastIfNotDoneAndBind.
+			constructorInvoc := invoc fast arguments first famixInvocation.
+			widget layout: (self factory createLayoutFor: constructorInvoc withParent: nil) ]
+]
+
+{ #category : #private }
 CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
+
+	| invocations |
+	invocations := self computeOutgoingInvocationForWidget: aWidget.
+
+	^ invocations select: [ :receivingInvocation | 
+		  #( 'add(' 'setViewportView(' 'setContentPane'
+		     'setJMenuBar' ) anySatisfy: [ :keyword | 
+			  receivingInvocation signature beginsWith: keyword ] ]
+]
+
+{ #category : #private }
+CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 
 	| invocations exploreLocalMethod |
 	invocations := OrderedCollection new.
@@ -46,11 +81,7 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 	invocations addAll: (invocations
 			 select: [ :invoc | invoc signature beginsWith: 'getContentPane' ]
 			 thenCollect: [ :invoc | invoc previous ]).
-	
-	^ invocations flattened asSet select: [ :receivingInvocation | 
-		  #( 'add(' 'setViewportView(' 'setLayout' 'setContentPane'
-		     'setJMenuBar' ) anySatisfy: [ :keyword | 
-			  receivingInvocation signature beginsWith: keyword ] ] 
+	^ invocations flattened asSet
 ]
 
 { #category : #api }
