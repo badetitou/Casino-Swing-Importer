@@ -83,8 +83,10 @@ CSNSwingModelImporterVisitor >> visitCSNUIMenuItem: aCSNUIMenuItem [
 
 { #category : #visiting }
 CSNSwingModelImporterVisitor >> visitCSNUIPanel: aCSNUIPanel [
-	
-	^ (#('JPanel' 'JScrollPane') includes: source invokedClassName)
+
+	^ (#( 'JPanel' 'JScrollPane' ) includesAny:
+		   (source invokedClass withSuperclassHierarchy collect:
+			    #invokedClassName))
 		  ifTrue: [ self createWidget: aCSNUIPanel ]
 		  ifFalse: [ nil ]
 ]
@@ -102,6 +104,14 @@ CSNSwingModelImporterVisitor >> visitCSNUISelect: aCSNUISelect [
 
 	^ 'JComboBox' = source invokedClassName
 		  ifTrue: [ self createWidget: aCSNUISelect ]
+		  ifFalse: [ nil ]
+]
+
+{ #category : #visiting }
+CSNSwingModelImporterVisitor >> visitCSNUITabManager: aCSNUITabManager [
+
+	^ 'JTabbedPane' = source invokedClassName
+		  ifTrue: [ self createWidget: aCSNUITabManager ]
 		  ifFalse: [ nil ]
 ]
 

@@ -43,10 +43,14 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 			                      = aWidget source target first ] ].
 	aWidget variable ifNotNil: [ :variable | 
 		invocations addAll: variable receivingInvocations ].
-	^ invocations flattened select: [ :receivingInvocation | 
+	invocations addAll: (invocations
+			 select: [ :invoc | invoc signature beginsWith: 'getContentPane' ]
+			 thenCollect: [ :invoc | invoc previous ]).
+	
+	^ invocations flattened asSet select: [ :receivingInvocation | 
 		  #( 'add(' 'setViewportView(' 'setLayout' 'setContentPane'
 		     'setJMenuBar' ) anySatisfy: [ :keyword | 
-			  receivingInvocation signature beginsWith: keyword ] ]
+			  receivingInvocation signature beginsWith: keyword ] ] 
 ]
 
 { #category : #api }
