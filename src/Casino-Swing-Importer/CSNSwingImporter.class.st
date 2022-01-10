@@ -7,6 +7,7 @@ Class {
 { #category : #api }
 CSNSwingImporter >> completeWidget: widget [
 	"add the leaf to the widget"
+"	self halt. "
 	widget
 		addAllWidgets:
 			(((self computeOutgoingAddInvocationForWidget: widget)
@@ -28,6 +29,11 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 	invocations := OrderedCollection new.
 	invocations addAll: aWidget source target first outgoingInvocations.
 	invocations addAll:
+		(aWidget source target first isConstructor ifTrue: [ 
+			 aWidget source target anyOne queryAllOutgoingInvocations select: [ 
+				 :invoc | 
+				 invoc receiver isNotNil and: [ invoc receiver isImplicitVariable ] ] ]).
+	invocations addAll:
 		(aWidget source target first classes collect: [ :aFamixJavaClass | 
 			 aFamixJavaClass queryLocalOutgoing: FamixTInvocation ]) flatten.
 	exploreLocalMethod := invocations copy.
@@ -45,8 +51,8 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 	aWidget variable ifNotNil: [ :variable | 
 		invocations addAll: variable receivingInvocations ].
 	^ invocations flattened select: [ :receivingInvocation | 
-		  #( 'add(' 'setViewportView(' 'setContentPane' 'setJMenuBar' ) 
-			  anySatisfy: [ :keyword | 
+		  #( 'add(' 'setViewportView(' 'setLayout' 'setContentPane'
+		     'setJMenuBar' ) anySatisfy: [ :keyword | 
 			  receivingInvocation signature beginsWith: keyword ] ]
 ]
 
@@ -138,7 +144,7 @@ CSNSwingImporter >> searchWidgetFromAddInvocation: invocation [
 			                      asOrderedCollection.
 		tmpClass := invocation source parentType.
 		[ tmpClass isInnerClass ] whileTrue: [ 
-			tmpClass := tmpClass belongsTo belongsTo.
+			tmpClass := (tmpClass typeContainer atScope: FamixTClass) anyOne.
 			possibleAttributes addAll: tmpClass attributes ].
 		var := possibleAttributes select: [ :attribute | 
 			       attribute name = param ] ].
