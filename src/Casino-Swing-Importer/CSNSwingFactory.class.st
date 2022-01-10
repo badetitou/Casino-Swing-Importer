@@ -22,7 +22,7 @@ CSNSwingFactory >> createPageFromInvocation: anInvocation [
 { #category : #factory }
 CSNSwingFactory >> createWidgetFromSwingInvocation: anInvocation [
 	| widget |
-	widget := (CSNWidget createWidgetFromSwingInvocation: anInvocation).
+	widget := super createWidgetFor: anInvocation withParent: nil.
 	widget affectedActions: anInvocation affectation;
 		realClass: anInvocation invokedClass;
 		name: (widget affectedActions ifNil: [anInvocation signature asString] ifNotNil: [widget affectedActions isAccess ifTrue: [widget affectedActions to name] ifFalse: [widget affectedActions name]]);

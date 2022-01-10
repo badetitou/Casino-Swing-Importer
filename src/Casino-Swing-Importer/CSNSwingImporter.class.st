@@ -64,7 +64,12 @@ CSNSwingImporter >> createAllPages [
 
 { #category : #accessing }
 CSNSwingImporter >> createFactory [
-	factory := CSNSwingFactory new model: model; yourself
+
+	factory := CSNSwingFactory new
+		           model: model;
+		           importer: self;
+					  addVisitorImporter: CSNSwingModelImporterVisitor new;
+		           yourself
 ]
 
 { #category : #api }
