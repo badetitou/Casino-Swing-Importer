@@ -87,7 +87,7 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 
 	| invocations |
 	invocations := self computeOutgoingInvocationForWidget: aWidget.
-
+	
 	^ invocations select: [ :receivingInvocation | 
 		  #( 'add(' 'setViewportView(' 'setContentPane'
 		     'setJMenuBar' ) anySatisfy: [ :keyword | 
@@ -97,16 +97,21 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 { #category : #private }
 CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 
-	| invocations exploreLocalMethod |
+	| invocations exploreLocalMethod targetMethod |
 	invocations := OrderedCollection new.
-	invocations addAll: aWidget source target first outgoingInvocations.
+
+	targetMethod := (aWidget source signature beginsWith: 'super(')
+		                ifTrue: [ "I look at how I am built instead of my super class" 
+			                aWidget source sender ]
+		                ifFalse: [ aWidget source target first ].
+	invocations addAll: targetMethod outgoingInvocations.
+	invocations addAll: (targetMethod isConstructor ifTrue: [ 
+			 (self retrievedLocalCallFlowOf: targetMethod) flatCollect: [ :method | 
+				 method queryAllOutgoingInvocations select: [ :invoc | 
+					 invoc receiver isNotNil and: [ 
+						 invoc receiver isImplicitVariable ] ] ] ]).
 	invocations addAll:
-		(aWidget source target first isConstructor ifTrue: [ 
-			 aWidget source target anyOne queryAllOutgoingInvocations select: [ 
-				 :invoc | 
-				 invoc receiver isNotNil and: [ invoc receiver isImplicitVariable ] ] ]).
-	invocations addAll:
-		(aWidget source target first classes collect: [ :aFamixJavaClass | 
+		(targetMethod classes collect: [ :aFamixJavaClass | 
 			 aFamixJavaClass queryLocalOutgoing: FamixTInvocation ]) flatten.
 	exploreLocalMethod := invocations copy.
 	[ exploreLocalMethod isNotEmpty ] whileTrue: [ 
@@ -135,9 +140,12 @@ CSNSwingImporter >> createAllPages [
 		first withSubclassHierarchy do: [ :jFrameSubclass | 
 		(jFrameSubclass methods select: #isConstructor) do: [ :constructor | 
 			(constructor incomingInvocations reject: [ :invocation | 
-				 invocation source name = 'main' and: [ 
-					 invocation source parentType name ~= 'Main' ] ]) do: [ 
-				:invocation | self factory createPageFromInvocation: invocation ] ] ].
+				 (invocation source name = 'main' and: [ 
+					  invocation source parentType name ~= 'Main' ]) or: [ 
+					 invocation container isNotNil and: [ 
+						 invocation container signature beginsWith: 'showOpenDialog' ] ] ]) 
+				do: [ :invocation | 
+				self factory createPageFromInvocation: invocation ] ] ].
 	^ self model
 ]
 
@@ -191,6 +199,22 @@ CSNSwingImporter >> postImport [
 			self model allCSNPage do: #postImport displayingProgress: [:wid | 'post import page : ', wid name asString ].
 	]
 	
+]
+
+{ #category : #'as yet unclassified' }
+CSNSwingImporter >> retrievedLocalCallFlowOf: aFamixJavaMethod [
+
+	| methods currentSize |
+	methods := Set new.
+	methods add: aFamixJavaMethod.
+	[ currentSize ~= methods size ] whileTrue: [ 
+		currentSize := methods size.
+		methods addAll: (methods flatCollect: [ :method | 
+				 method queryAllOutgoingInvocations
+					 collect: [ :invoc | invoc target anyOne ]
+					 thenSelect: [ :invoc | 
+					 invoc parentType = aFamixJavaMethod parentType ] ]) ].
+	^ methods
 ]
 
 { #category : #api }
