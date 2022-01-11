@@ -46,7 +46,7 @@ CSNSwingImporter >> computeActionsOf: widget [
 					                method name = 'actionPerformed' ].
 				widget addAction: ((self factory create: CSNBOnClick)
 						 addBehavior: (methodCalled
-								  generateFastAndBind;
+								  generateFastIfNotDoneAndBind;
 								  fast);
 						 yourself).
 				methodCalled := listenerClass ] ]
