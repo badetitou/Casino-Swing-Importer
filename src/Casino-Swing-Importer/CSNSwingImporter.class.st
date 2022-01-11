@@ -14,11 +14,16 @@ CSNSwingImporter >> completeWidget: widget [
 ]
 
 { #category : #private }
-CSNSwingImporter >> computeChildrenOf: widget [ 
-	widget addAllWidgets:
-		(((self computeOutgoingAddInvocationForWidget: widget) collect: [ 
-			  :invoc | self searchWidgetFromAddInvocation: invoc ]) reject:
-			 #isNil)
+CSNSwingImporter >> computeChildrenOf: widget [
+
+	(((self computeOutgoingAddInvocationForWidget: widget) collect: [ 
+		  :invoc | (self searchWidgetFromAddInvocation: invoc) -> invoc ]) 
+		 reject: [ :assocWidgetWithAddInvoc | 
+		 assocWidgetWithAddInvoc key isNil ]) do: [ :assocWidgetWithAddInvoc | 
+		widget
+			addWidget: assocWidgetWithAddInvoc key
+			withInvocationOfAdd: assocWidgetWithAddInvoc value
+			usingFactory: self factory ]
 ]
 
 { #category : #private }
