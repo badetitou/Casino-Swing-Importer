@@ -10,7 +10,46 @@ CSNSwingImporter >> completeWidget: widget [
 	"add the leaf to the widget"
 
 	self computeLayoutOf: widget.
-	self computeChildrenOf: widget
+	self computeChildrenOf: widget.
+	self computeActionsOf: widget.
+]
+
+{ #category : #private }
+CSNSwingImporter >> computeActionsOf: widget [
+
+	| invocations addActionsListenersInvocations |
+	invocations := self computeOutgoingInvocationForWidget: widget.
+	addActionsListenersInvocations := invocations select: [ 
+		                                  :receivingInvocation | 
+		                                  #( 'addActionListener' ) 
+			                                  anySatisfy: [ :keyword | 
+			                                  receivingInvocation signature 
+				                                  beginsWith: keyword ] ].
+	addActionsListenersInvocations do: [ :addActionsListenersInvocation | 
+		| invocationArgument listenerClass methodCalled |
+		addActionsListenersInvocation sender generateFastIfNotDoneAndBind.
+		invocationArgument := addActionsListenersInvocation fast arguments
+			                      anyOneIfOnlyOneElement.
+		invocationArgument name = 'this' ifTrue: [ 
+			listenerClass := (addActionsListenersInvocation sender atScope:
+				                  FamixTClass) anyOne ].
+		(invocationArgument isKindOf: FASTJavaNewClassExpression) ifTrue: [ 
+			listenerClass := invocationArgument famixType ].
+		(invocationArgument isKindOf: FASTJavaOuterThis) ifTrue: [ 
+			listenerClass := self sourceModel allModelClasses detect: [ :class | 
+				                 class name = invocationArgument type name ] ].
+		listenerClass
+			ifNil: [ 
+			Transcript crShow: 'Not Found for ' , invocationArgument name ]
+			ifNotNil: [ 
+				methodCalled := listenerClass methods detect: [ :method | 
+					                method name = 'actionPerformed' ].
+				widget addAction: ((self factory create: CSNBOnClick)
+						 addBehavior: (methodCalled
+								  generateFastAndBind;
+								  fast);
+						 yourself).
+				methodCalled := listenerClass ] ]
 ]
 
 { #category : #private }
@@ -217,6 +256,6 @@ CSNSwingImporter >> searchWidgetFromAddInvocation: invocation [
 		instanciationInvoc ifNil: [ ^ nil ].
 		widget := self factory createWidgetFromSwingInvocation:
 			          instanciationInvoc.
-		widget isContainer ifTrue: [ self completeWidget: widget ] ].
+		 self completeWidget: widget ] .
 	^ widget
 ]

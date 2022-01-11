@@ -19,7 +19,7 @@ BaselineOfCasinoSwingImporter >> defineDependencies: spec [
 	spec
 		baseline: 'Casino'
 		with: [ spec
-				loads: 'importer-java';
+				loads: 'behavior-bl';
 				repository: 'github://badetitou/Casino:v2/src' ]
 ]
 
