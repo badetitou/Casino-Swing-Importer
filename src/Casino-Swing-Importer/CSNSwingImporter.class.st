@@ -1,6 +1,10 @@
 Class {
 	#name : #CSNSwingImporter,
 	#superclass : #CSNWebModel,
+	#instVars : [
+		'possibleAddInvocationVisitor',
+		'possibleAddInvocationVisitorClass'
+	],
 	#category : #'Casino-Swing-Importer'
 }
 
@@ -92,8 +96,7 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 	invocations := self computeOutgoingInvocationForWidget: aWidget.
 	
 	^ invocations select: [ :receivingInvocation | 
-		  #( 'add(' 'setViewportView(' 'setContentPane'
-		     'setJMenuBar' ) anySatisfy: [ :keyword | 
+		  (self possibleAddInvocationVisitor visit: aWidget) anySatisfy: [ :keyword | 
 			  receivingInvocation signature beginsWith: keyword ] ]
 ]
 
@@ -179,6 +182,31 @@ CSNSwingImporter >> import [
 	self generateWidgets
 ]
 
+{ #category : #accessing }
+CSNSwingImporter >> possibleAddInvocationVisitor [
+
+	^ possibleAddInvocationVisitor
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> possibleAddInvocationVisitor: anObject [
+
+	possibleAddInvocationVisitor := anObject
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> possibleAddInvocationVisitorClass [
+
+	^ possibleAddInvocationVisitorClass ifNil: [ 
+		  possibleAddInvocationVisitorClass := CSNSwingPossibleAddInvocationVisitor ]
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> possibleAddInvocationVisitorClass: anObject [
+
+	^ possibleAddInvocationVisitorClass := anObject
+]
+
 { #category : #api }
 CSNSwingImporter >> postImport [
 	| currentStep maxStep |
@@ -201,6 +229,13 @@ CSNSwingImporter >> postImport [
 			bar label: currentStep printString , '/' , maxStep printString , ' for pages'.
 			self model allCSNPage do: #postImport displayingProgress: [:wid | 'post import page : ', wid name asString ].
 	]
+	
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> preImport [
+	super preImport.
+	possibleAddInvocationVisitor := self possibleAddInvocationVisitorClass new
 	
 ]
 
