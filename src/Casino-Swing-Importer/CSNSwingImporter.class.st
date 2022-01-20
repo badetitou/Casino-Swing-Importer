@@ -29,7 +29,7 @@ CSNSwingImporter >> computeActionsOf: widget [
 		| invocationArgument listenerClass methodCalled |
 		addActionsListenersInvocation sender generateFastIfNotDoneAndBind.
 		invocationArgument := addActionsListenersInvocation fast arguments
-			                      anyOneIfOnlyOneElement.
+			                      anyOne.
 		invocationArgument name = 'this' ifTrue: [ 
 			listenerClass := (addActionsListenersInvocation sender atScope:
 				                  FamixTClass) anyOne ].
@@ -39,11 +39,14 @@ CSNSwingImporter >> computeActionsOf: widget [
 			listenerClass := self sourceModel allModelClasses detect: [ :class | 
 				                 class name = invocationArgument type name ] ].
 		listenerClass
-			ifNil: [ 
-			Transcript crShow: 'Not Found for ' , invocationArgument name ]
+			ifNil: [ ('Not Found for ' , invocationArgument name) record ]
 			ifNotNil: [ 
-				methodCalled := listenerClass methods detect: [ :method | 
-					                method name = 'actionPerformed' ].
+				methodCalled := listenerClass methods
+					                detect: [ :method | 
+					                method name = 'actionPerformed' ]
+					                ifNone: [ 
+						                ('Not found for ' , listenerClass name) record.
+						                ^ nil ].
 				widget addAction: ((self factory create: CSNBOnClick)
 						 addBehavior: (methodCalled
 								  generateFastIfNotDoneAndBind;
