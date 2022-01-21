@@ -105,10 +105,14 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 
 	| invocations exploreLocalMethod targetMethod |
 	invocations := OrderedCollection new.
-	targetMethod := (aWidget source signature beginsWith: 'super(')
-		                ifTrue: [ "I look at how I am built instead of my super class" 
-			                aWidget source sender ]
-		                ifFalse: [ aWidget source target first ].
+
+	targetMethod := (aWidget source class usesTrait: FamixTMethod)
+		                ifTrue: [ aWidget source ]
+		                ifFalse: [ 
+			                (aWidget source signature beginsWith: 'super(')
+				                ifTrue: [ "I look at how I am built instead of my super class" 
+					                aWidget source sender ]
+				                ifFalse: [ aWidget source target first ] ].
 	invocations addAll: targetMethod outgoingInvocations.
 	targetMethod isConstructor ifTrue: [ 
 		invocations addAll:
@@ -124,19 +128,20 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 	[ exploreLocalMethod isNotEmpty ] whileTrue: [ 
 		invocations addAll: ((exploreLocalMethod flatCollect: [ :invoc | 
 				  invoc target first outgoingInvocations ]) select: [ :invoc | 
-				 aWidget source target first belongsTo = invoc source belongsTo 
+				 targetMethod belongsTo = invoc source belongsTo 
 					 and: [ 
 					 invoc receiver isNil or: [ invoc receiver isImplicitVariable ] ] ]).
 		exploreLocalMethod := (exploreLocalMethod flatCollect: [ :invoc | 
 			                       invoc target first outgoingInvocations ]) 
 			                      select: [ :invoc | 
 			                      invoc target first
-			                      = aWidget source target first ] ].
+			                      = targetMethod ] ].
 	aWidget variable ifNotNil: [ :variable | 
 		aWidget variable fastAccesses
 			detect: [ :access | "Test if the variable is returned"
 				(access atAnyScope: { 
 						 FASTJavaReturnStatement.
+						 FASTJavaClassDeclaration.
 						 FASTTBehaviouralEntity }) anyOne isKindOf:
 					FASTJavaReturnStatement ]
 			ifOne: [ :access | 
@@ -144,7 +149,8 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 					 collect: #affectation
 					 thenSelect: #isNotNil) do: [ :variableOfMethodThatCallMe | 
 					invocations addAll:
-						variableOfMethodThatCallMe receivingInvocations ] ].
+						variableOfMethodThatCallMe receivingInvocations ] ]
+			ifNone: [ "nothing to do here" ].
 		invocations addAll: variable receivingInvocations ].
 	invocations addAll: (invocations
 			 select: [ :invoc | invoc signature beginsWith: 'getContentPane' ]
