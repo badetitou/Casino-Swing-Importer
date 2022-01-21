@@ -105,7 +105,6 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 
 	| invocations exploreLocalMethod targetMethod |
 	invocations := OrderedCollection new.
-
 	targetMethod := (aWidget source signature beginsWith: 'super(')
 		                ifTrue: [ "I look at how I am built instead of my super class" 
 			                aWidget source sender ]
@@ -134,6 +133,18 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 			                      invoc target first
 			                      = aWidget source target first ] ].
 	aWidget variable ifNotNil: [ :variable | 
+		aWidget variable fastAccesses
+			detect: [ :access | "Test if the variable is returned"
+				(access atAnyScope: { 
+						 FASTJavaReturnStatement.
+						 FASTTBehaviouralEntity }) anyOne isKindOf:
+					FASTJavaReturnStatement ]
+			ifOne: [ :access | 
+				(aWidget source sender incomingInvocations
+					 collect: #affectation
+					 thenSelect: #isNotNil) do: [ :variableOfMethodThatCallMe | 
+					invocations addAll:
+						variableOfMethodThatCallMe receivingInvocations ] ].
 		invocations addAll: variable receivingInvocations ].
 	invocations addAll: (invocations
 			 select: [ :invoc | invoc signature beginsWith: 'getContentPane' ]
@@ -292,7 +303,7 @@ CSNSwingImporter >> searchInstatiateVariable: var [
 			   invoc target first isConstructor ]) first ]
 ]
 
-{ #category : #api }
+{ #category : #'private - actions' }
 CSNSwingImporter >> searchWidgetFromAddInvocation: invocation [
 
 	"search the widget added "
