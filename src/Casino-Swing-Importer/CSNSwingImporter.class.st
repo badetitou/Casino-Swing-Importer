@@ -111,11 +111,13 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 			                aWidget source sender ]
 		                ifFalse: [ aWidget source target first ].
 	invocations addAll: targetMethod outgoingInvocations.
-	invocations addAll: (targetMethod isConstructor ifTrue: [ 
-			 (self retrievedLocalCallFlowOf: targetMethod) flatCollect: [ :method | 
+	targetMethod isConstructor ifTrue: [ 
+		invocations addAll:
+			((self retrievedLocalCallFlowOf: targetMethod) flatCollect: [ 
+				 :method | 
 				 method queryAllOutgoingInvocations select: [ :invoc | 
 					 invoc receiver isNotNil and: [ 
-						 invoc receiver isImplicitVariable ] ] ] ]).
+						 invoc receiver isImplicitVariable ] ] ]) ].
 	invocations addAll:
 		(targetMethod classes collect: [ :aFamixJavaClass | 
 			 aFamixJavaClass queryLocalOutgoing: FamixTInvocation ]) flatten.
