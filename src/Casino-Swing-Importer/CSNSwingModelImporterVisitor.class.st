@@ -79,6 +79,16 @@ CSNSwingModelImporterVisitor >> visitCSNUIInputPassword: aCSNUIInputPassword [
 ]
 
 { #category : #visiting }
+CSNSwingModelImporterVisitor >> visitCSNUIInputRadio: aCSNUIInputRadio [
+
+	^ (#( 'JRadioButton' ) includesAny:
+		   (source invokedClass withSuperclassHierarchy collect:
+			    #invokedClassName))
+		  ifTrue: [ self createWidget: aCSNUIInputRadio ]
+		  ifFalse: [ nil ]
+]
+
+{ #category : #visiting }
 CSNSwingModelImporterVisitor >> visitCSNUIInputText: aCSNUIInputText [
 
 	^ 'JTextField' = source invokedClassName
