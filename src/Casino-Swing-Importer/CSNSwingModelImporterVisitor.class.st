@@ -37,6 +37,12 @@ CSNSwingModelImporterVisitor >> visitCSNUIButton: aCSNUIButton [
 ]
 
 { #category : #visiting }
+CSNSwingModelImporterVisitor >> visitCSNUIFieldset: aCSNUIFieldset [
+
+	^ nil
+]
+
+{ #category : #visiting }
 CSNSwingModelImporterVisitor >> visitCSNUIInputCheckbox: aCSNUIInputCheckbox [
 
 	^ 'JCheckBox' = source invokedClassName
