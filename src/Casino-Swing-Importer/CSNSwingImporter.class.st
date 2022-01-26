@@ -63,7 +63,7 @@ CSNSwingImporter >> computeActionsOf: widget [
 CSNSwingImporter >> computeChildrenOf: widget [
 
 	(((self computeOutgoingAddInvocationForWidget: widget) collect: [ 
-		  :invoc | (self searchWidgetFromAddInvocation: invoc) -> invoc ]) 
+		  :invoc | (self searchWidgetFromAddInvocation: invoc  for: widget ) -> invoc ]) 
 		 reject: [ :assocWidgetWithAddInvoc | 
 		 assocWidgetWithAddInvoc key isNil ]) do: [ :assocWidgetWithAddInvoc | 
 		widget
@@ -310,7 +310,7 @@ CSNSwingImporter >> searchInstatiateVariable: var [
 ]
 
 { #category : #'private - actions' }
-CSNSwingImporter >> searchWidgetFromAddInvocation: invocation [
+CSNSwingImporter >> searchWidgetFromAddInvocation: invocation for: widget2 [
 
 	"search the widget added "
 
@@ -337,6 +337,6 @@ CSNSwingImporter >> searchWidgetFromAddInvocation: invocation [
 		instanciationInvoc ifNil: [ ^ nil ].
 		widget := self factory createWidgetFromSwingInvocation:
 			          instanciationInvoc.
-		 self completeWidget: widget ] .
+		self completeWidget: widget ].
 	^ widget
 ]
