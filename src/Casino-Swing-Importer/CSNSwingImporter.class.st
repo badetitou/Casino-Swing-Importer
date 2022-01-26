@@ -114,9 +114,9 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 					                aWidget source sender ]
 				                ifFalse: [ aWidget source target first ] ].
 	invocations addAll: targetMethod outgoingInvocations.
-	targetMethod isConstructor ifTrue: [
-		"I might understand stuff based of parameters of the invocations of the constructor" 
-		invocations add: aWidget source.
+	targetMethod isConstructor ifTrue: [ "I might understand stuff based of parameters of the invocations of the constructor"
+		(aWidget source isKindOf: FamixJavaInvocation) ifTrue: [ 
+			invocations add: aWidget source ].
 		invocations addAll:
 			((self retrievedLocalCallFlowOf: targetMethod) flatCollect: [ 
 				 :method | 
@@ -155,7 +155,7 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 
 	invocations
 		select: [ :invoc | invoc signature beginsWith: 'getContentPane' ]
-		thenDo: [ :invoc |
+		thenDo: [ :invoc | 
 			invoc generateFastIfNotDoneAndBind.
 			(invoc fast receiverOwner isKindOf: FASTJavaMethodInvocation) 
 				ifTrue: [ 
