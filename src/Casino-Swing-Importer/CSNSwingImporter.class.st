@@ -128,14 +128,12 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 	[ exploreLocalMethod isNotEmpty ] whileTrue: [ 
 		invocations addAll: ((exploreLocalMethod flatCollect: [ :invoc | 
 				  invoc target first outgoingInvocations ]) select: [ :invoc | 
-				 targetMethod belongsTo = invoc source belongsTo 
-					 and: [ 
+				 targetMethod belongsTo = invoc source belongsTo and: [ 
 					 invoc receiver isNil or: [ invoc receiver isImplicitVariable ] ] ]).
 		exploreLocalMethod := (exploreLocalMethod flatCollect: [ :invoc | 
 			                       invoc target first outgoingInvocations ]) 
 			                      select: [ :invoc | 
-			                      invoc target first
-			                      = targetMethod ] ].
+			                      invoc target first = targetMethod ] ].
 	aWidget variable ifNotNil: [ :variable | 
 		aWidget variable fastAccesses
 			detect: [ :access | "Test if the variable is returned"
@@ -152,9 +150,14 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 						variableOfMethodThatCallMe receivingInvocations ] ]
 			ifNone: [ "nothing to do here" ].
 		invocations addAll: variable receivingInvocations ].
-	invocations addAll: (invocations
-			 select: [ :invoc | invoc signature beginsWith: 'getContentPane' ]
-			 thenCollect: [ :invoc | invoc previous ]).
+
+	invocations
+		select: [ :invoc | invoc signature beginsWith: 'getContentPane' ]
+		thenDo: [ :invoc |
+			invoc generateFastIfNotDoneAndBind.
+			(invoc fast receiverOwner isKindOf: FASTJavaMethodInvocation) 
+				ifTrue: [ 
+				invocations add: invoc fast receiverOwner famixInvocation ] ].
 	^ invocations flattened asSet
 ]
 
