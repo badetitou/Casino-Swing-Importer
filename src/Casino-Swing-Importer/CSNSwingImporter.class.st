@@ -61,9 +61,9 @@ CSNSwingImporter >> computeActionsOf: widget [
 
 { #category : #private }
 CSNSwingImporter >> computeChildrenOf: widget [
-
 	(((self computeOutgoingAddInvocationForWidget: widget) collect: [ 
-		  :invoc | (self searchWidgetFromAddInvocation: invoc  for: widget ) -> invoc ]) 
+		  :invoc | 
+		  (self searchWidgetFromAddInvocation: invoc for: widget) -> invoc ]) 
 		 reject: [ :assocWidgetWithAddInvoc | 
 		 assocWidgetWithAddInvoc key isNil ]) do: [ :assocWidgetWithAddInvoc | 
 		widget
@@ -114,7 +114,9 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 					                aWidget source sender ]
 				                ifFalse: [ aWidget source target first ] ].
 	invocations addAll: targetMethod outgoingInvocations.
-	targetMethod isConstructor ifTrue: [ 
+	targetMethod isConstructor ifTrue: [
+		"I might understand stuff based of parameters of the invocations of the constructor" 
+		invocations add: aWidget source.
 		invocations addAll:
 			((self retrievedLocalCallFlowOf: targetMethod) flatCollect: [ 
 				 :method | 
