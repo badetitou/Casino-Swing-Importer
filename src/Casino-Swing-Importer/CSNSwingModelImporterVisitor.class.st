@@ -145,7 +145,9 @@ CSNSwingModelImporterVisitor >> visitCSNUIParagraph: aCSNUIParagraph [
 { #category : #visiting }
 CSNSwingModelImporterVisitor >> visitCSNUISelect: aCSNUISelect [
 
-	^ 'JComboBox' = source invokedClassName
+	^ (#('JComboBox') includesAny:
+		   (source invokedClass withSuperclassHierarchy collect:
+			    #invokedClassName))
 		  ifTrue: [ self createWidget: aCSNUISelect ]
 		  ifFalse: [ nil ]
 ]
