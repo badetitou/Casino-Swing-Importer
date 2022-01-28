@@ -109,10 +109,13 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 	targetMethod := (aWidget source class usesTrait: FamixTMethod)
 		                ifTrue: [ aWidget source ]
 		                ifFalse: [ 
-			                (aWidget source signature beginsWith: 'super(')
-				                ifTrue: [ "I look at how I am built instead of my super class" 
-					                aWidget source sender ]
-				                ifFalse: [ aWidget source target first ] ].
+			                (aWidget source class usesTrait: FamixTParameter)
+				                ifTrue: [ aWidget source parentBehaviouralEntity ]
+				                ifFalse: [ 
+					                (aWidget source signature beginsWith: 'super(')
+						                ifTrue: [ "I look at how I am built instead of my super class" 
+							                aWidget source sender ]
+						                ifFalse: [ aWidget source target first ] ] ].
 	invocations addAll: targetMethod outgoingInvocations.
 	targetMethod isConstructor ifTrue: [ "I might understand stuff based of parameters of the invocations of the constructor"
 		(aWidget source isKindOf: FamixJavaInvocation) ifTrue: [ 
