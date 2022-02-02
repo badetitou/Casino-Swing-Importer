@@ -139,21 +139,20 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 			                       invoc target first outgoingInvocations ]) 
 			                      select: [ :invoc | 
 			                      invoc target first = targetMethod ] ].
+	((aWidget variable isNotNil and: [ 
+		  aWidget variable fastAccesses anySatisfy: [ :access | "Test if the variable is returned"
+			  (access atAnyScope: { 
+					   FASTJavaReturnStatement.
+					   FASTJavaClassDeclaration.
+					   FASTTBehaviouralEntity }) anyOne isKindOf:
+				  FASTJavaReturnStatement ] ]) or: [ 
+		 (aWidget source isKindOf: FamixJavaInvocation) and: [ 
+			 aWidget source isReturned ] ]) ifTrue: [ 
+		(aWidget source sender incomingInvocations
+			 collect: #affectation
+			 thenSelect: #isNotNil) do: [ :variableOfMethodThatCallMe | 
+			invocations addAll: variableOfMethodThatCallMe receivingInvocations ] ].
 	aWidget variable ifNotNil: [ :variable | 
-		aWidget variable fastAccesses
-			detect: [ :access | "Test if the variable is returned"
-				(access atAnyScope: { 
-						 FASTJavaReturnStatement.
-						 FASTJavaClassDeclaration.
-						 FASTTBehaviouralEntity }) anyOne isKindOf:
-					FASTJavaReturnStatement ]
-			ifOne: [ :access | 
-				(aWidget source sender incomingInvocations
-					 collect: #affectation
-					 thenSelect: #isNotNil) do: [ :variableOfMethodThatCallMe | 
-					invocations addAll:
-						variableOfMethodThatCallMe receivingInvocations ] ]
-			ifNone: [ "nothing to do here" ].
 		invocations addAll: variable receivingInvocations ].
 
 	invocations
