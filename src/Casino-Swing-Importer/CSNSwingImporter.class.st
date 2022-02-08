@@ -70,7 +70,20 @@ CSNSwingImporter >> computeChildrenOf: widget [
 		| widgetToAdd |
 		widgetToAdd := assocWidgetWithAddInvoc key widgetContainer
 			               ifNotNil: [ 
-			               assocWidgetWithAddInvoc key verticalVeryDeepCopy ]
+				               | copy |
+				               copy := assocWidgetWithAddInvoc key
+					                       verticalVeryDeepCopy.
+				               (copy recursiveWidgets , { copy }) flattened
+					               select: [ :wid | wid children isEmpty ]
+					               thenDo: [ :wid | 
+						               self
+							               execute: [ self computeChildrenOf: wid ]
+							               recordedAs:
+								               (String streamContents: [ :stream | 
+									                stream << 'Compute child: '
+									                << wid printString << ' of '
+									                << assocWidgetWithAddInvoc key printString ]) ].
+				               copy ]
 			               ifNil: [ assocWidgetWithAddInvoc key ].
 		widget
 			addWidget: widgetToAdd
