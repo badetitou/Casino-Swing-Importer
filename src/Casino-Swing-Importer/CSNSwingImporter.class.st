@@ -61,13 +61,18 @@ CSNSwingImporter >> computeActionsOf: widget [
 
 { #category : #private }
 CSNSwingImporter >> computeChildrenOf: widget [
+
 	(((self computeOutgoingAddInvocationForWidget: widget) collect: [ 
 		  :invoc | 
 		  (self searchWidgetFromAddInvocation: invoc for: widget) -> invoc ]) 
 		 reject: [ :assocWidgetWithAddInvoc | 
 		 assocWidgetWithAddInvoc key isNil ]) do: [ :assocWidgetWithAddInvoc | 
+		| widgetToAdd |
+		widgetToAdd := assocWidgetWithAddInvoc key widgetContainer 
+			               ifNotNil: [ 
+			               assocWidgetWithAddInvoc key verticalVeryDeepCopy ].
 		widget
-			addWidget: assocWidgetWithAddInvoc key
+			addWidget: widgetToAdd
 			withInvocationOfAdd: assocWidgetWithAddInvoc value
 			usingFactory: self factory ]
 ]
