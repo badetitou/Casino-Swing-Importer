@@ -68,9 +68,10 @@ CSNSwingImporter >> computeChildrenOf: widget [
 		 reject: [ :assocWidgetWithAddInvoc | 
 		 assocWidgetWithAddInvoc key isNil ]) do: [ :assocWidgetWithAddInvoc | 
 		| widgetToAdd |
-		widgetToAdd := assocWidgetWithAddInvoc key widgetContainer 
+		widgetToAdd := assocWidgetWithAddInvoc key widgetContainer
 			               ifNotNil: [ 
-			               assocWidgetWithAddInvoc key verticalVeryDeepCopy ].
+			               assocWidgetWithAddInvoc key verticalVeryDeepCopy ]
+			               ifNil: [ assocWidgetWithAddInvoc key ].
 		widget
 			addWidget: widgetToAdd
 			withInvocationOfAdd: assocWidgetWithAddInvoc value
