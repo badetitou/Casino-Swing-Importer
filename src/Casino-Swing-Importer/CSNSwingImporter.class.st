@@ -74,7 +74,8 @@ CSNSwingImporter >> computeChildrenOf: widget [
 				               copy := assocWidgetWithAddInvoc key
 					                       verticalVeryDeepCopy.
 				               (copy recursiveWidgets , { copy }) flattened
-					               select: [ :wid | wid children isEmpty ]
+					               select: [ :wid | 
+					               wid isContainer and: [ wid children isEmpty ] ]
 					               thenDo: [ :wid | 
 						               self
 							               execute: [ self computeChildrenOf: wid ]
@@ -114,9 +115,9 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 	| invocations |
 	invocations := self computeOutgoingInvocationForWidget: aWidget.
 	
-	^ invocations select: [ :receivingInvocation | 
+	^ (invocations select: [ :receivingInvocation | 
 		  (self possibleAddInvocationVisitor visit: aWidget) anySatisfy: [ :keyword | 
-			  receivingInvocation signature beginsWith: keyword ] ]
+			  receivingInvocation signature beginsWith: keyword ] ]) asSet
 ]
 
 { #category : #private }
