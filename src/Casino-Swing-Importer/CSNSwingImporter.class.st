@@ -113,11 +113,17 @@ CSNSwingImporter >> computeLayoutOf: widget [
 CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 
 	| invocations |
-	invocations := self computeOutgoingInvocationForWidget: aWidget.
-	
+	invocations := (self computeOutgoingInvocationForWidget: aWidget) 
+		               select: [ :receivingInvocation | 
+			receivingInvocation sender parentType = aWidget realClass or: [ 
+			               aWidget sources anySatisfy: [ :source |
+				source isInvocation not or: [  
+				               source sender parentType
+				               = receivingInvocation sender parentType ] ] ] ].
 	^ (invocations select: [ :receivingInvocation | 
-		  (self possibleAddInvocationVisitor visit: aWidget) anySatisfy: [ :keyword | 
-			  receivingInvocation signature beginsWith: keyword ] ]) asSet
+		   (self possibleAddInvocationVisitor visit: aWidget) anySatisfy: [ 
+			   :keyword | receivingInvocation signature beginsWith: keyword ] ])
+		  asSet
 ]
 
 { #category : #private }
@@ -159,19 +165,11 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 			                       invoc target first outgoingInvocations ]) 
 			                      select: [ :invoc | 
 			                      invoc target first = targetMethod ] ].
-	((aWidget variable isNotNil and: [ 
-		  aWidget variable fastAccesses anySatisfy: [ :access | "Test if the variable is returned"
-			  (access atAnyScope: { 
-					   FASTJavaReturnStatement.
-					   FASTJavaClassDeclaration.
-					   FASTTBehaviouralEntity }) anyOne isKindOf:
-				  FASTJavaReturnStatement ] ]) or: [ 
-		 (aWidget source isKindOf: FamixJavaInvocation) and: [ 
-			 aWidget source isReturned ] ]) ifTrue: [ 
+	(self isWidgetReturned: aWidget) ifTrue: [ 
 		(aWidget source sender incomingInvocations
 			 collect: #affectation
 			 thenSelect: #isNotNil) do: [ :variableOfMethodThatCallMe | 
-			invocations addAll: variableOfMethodThatCallMe receivingInvocations ] ].
+			invocations addAll: variableOfMethodThatCallMe receivingInvocations ] ]. "Test if the variable is returned"
 	aWidget variable ifNotNil: [ :variable | 
 		invocations addAll: variable receivingInvocations ].
 
@@ -226,6 +224,20 @@ CSNSwingImporter >> generateWidgets [
 CSNSwingImporter >> import [
 	self createAllPages.
 	self generateWidgets
+]
+
+{ #category : #private }
+CSNSwingImporter >> isWidgetReturned: aWidget [
+
+	^ (aWidget variable isNotNil and: [ 
+		   aWidget variable fastAccesses anySatisfy: [ :access | "Test if the variable is returned"
+			   (access atAnyScope: { 
+					    FASTJavaReturnStatement.
+					    FASTJavaClassDeclaration.
+					    FASTTBehaviouralEntity }) anyOne isKindOf:
+				   FASTJavaReturnStatement ] ]) or: [ 
+		  (aWidget source isKindOf: FamixJavaInvocation) and: [ 
+			  aWidget source isReturned ] ]
 ]
 
 { #category : #accessing }
