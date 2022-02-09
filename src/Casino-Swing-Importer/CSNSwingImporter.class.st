@@ -61,7 +61,7 @@ CSNSwingImporter >> computeActionsOf: widget [
 
 { #category : #private }
 CSNSwingImporter >> computeChildrenOf: widget [
-
+	('compute child of ', widget printString) record.
 	(((self computeOutgoingAddInvocationForWidget: widget) collect: [ 
 		  :invoc | 
 		  (self searchWidgetFromAddInvocation: invoc for: widget) -> invoc ]) 
@@ -113,16 +113,15 @@ CSNSwingImporter >> computeLayoutOf: widget [
 CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 
 	| invocations |
-	invocations := (self computeOutgoingInvocationForWidget: aWidget) 
-		               select: [ :receivingInvocation | 
-			receivingInvocation sender parentType = aWidget realClass or: [ 
-			               aWidget sources anySatisfy: [ :source |
-				source isInvocation not or: [  
-				               source sender parentType
-				               = receivingInvocation sender parentType ] ] ] ].
+	invocations := self computeOutgoingInvocationForWidget: aWidget.
 	^ (invocations select: [ :receivingInvocation | 
-		   (self possibleAddInvocationVisitor visit: aWidget) anySatisfy: [ 
-			   :keyword | receivingInvocation signature beginsWith: keyword ] ])
+		   (receivingInvocation sender parentType = aWidget realClass or: [ 
+			    aWidget sources anySatisfy: [ :source | 
+				    source isInvocation not or: [ 
+					    source sender parentType
+					    = receivingInvocation sender parentType ] ] ]) and: [ 
+			   (self possibleAddInvocationVisitor visit: aWidget) anySatisfy: [ 
+				   :keyword | receivingInvocation signature beginsWith: keyword ] ] ])
 		  asSet
 ]
 
