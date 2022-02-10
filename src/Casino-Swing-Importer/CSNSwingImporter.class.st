@@ -61,7 +61,8 @@ CSNSwingImporter >> computeActionsOf: widget [
 
 { #category : #private }
 CSNSwingImporter >> computeChildrenOf: widget [
-	('compute child of ', widget printString) record.
+
+	('compute child of ' , widget printString) record.
 	(((self computeOutgoingAddInvocationForWidget: widget) collect: [ 
 		  :invoc | 
 		  (self searchWidgetFromAddInvocation: invoc for: widget) -> invoc ]) 
@@ -149,8 +150,7 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 			((self retrievedLocalCallFlowOf: targetMethod) flatCollect: [ 
 				 :method | 
 				 method queryAllOutgoingInvocations select: [ :invoc | 
-					 invoc receiver isNotNil and: [ 
-						 invoc receiver isImplicitVariable ] ] ]) ].
+					 invoc receiver isNotNil  ] ]) ].
 	invocations addAll:
 		(targetMethod classes collect: [ :aFamixJavaClass | 
 			 aFamixJavaClass queryLocalOutgoing: FamixTInvocation ]) flatten.
