@@ -104,10 +104,17 @@ CSNSwingImporter >> computeLayoutOf: widget [
 			#( 'setLayout' ) anySatisfy: [ :keyword | 
 				receivingInvocation signature beginsWith: keyword ] ]
 		thenDo: [ :invoc | 
-			| constructorInvoc |
+			| constructorInvoc argument |
 			invoc sender generateFastIfNotDoneAndBind.
-			constructorInvoc := invoc fast arguments first famixInvocation.
-			widget layout: (self factory createLayoutFor: constructorInvoc withParent: nil) ]
+			argument := invoc fast arguments first.
+			constructorInvoc := argument famixInvocation ifNil: [ 
+				                    argument famixVariable
+					                    ifNotNil: [ :famixVariable | 
+					                    famixVariable declaredType ]
+					                    ifNil: [ nil ] ].
+			constructorInvoc ifNotNil: [ 
+				widget layout:
+					(self factory createLayoutFor: constructorInvoc withParent: nil) ] ]
 ]
 
 { #category : #private }
