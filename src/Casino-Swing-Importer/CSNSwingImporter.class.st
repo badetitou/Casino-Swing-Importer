@@ -3,10 +3,19 @@ Class {
 	#superclass : #CSNWebModel,
 	#instVars : [
 		'possibleAddInvocationVisitor',
-		'possibleAddInvocationVisitorClass'
+		'possibleAddInvocationVisitorClass',
+		'addWidgetVisitor',
+		'possibleAddWidgetVisitorClass'
 	],
 	#category : #'Casino-Swing-Importer'
 }
+
+{ #category : #accessing }
+CSNSwingImporter >> addWidgetVisitorClass [
+
+	^ possibleAddWidgetVisitorClass ifNil: [ 
+		  possibleAddWidgetVisitorClass := CSNSwingAddWidgetVisitor ]
+]
 
 { #category : #api }
 CSNSwingImporter >> completeWidget: widget [
@@ -62,7 +71,8 @@ CSNSwingImporter >> computeActionsOf: widget [
 { #category : #private }
 CSNSwingImporter >> computeChildrenOf: widget [
 
-	('compute child of ' , widget printString) record.
+	(String streamContents: [ :stream | 
+		 stream << 'compute child of ' << widget printString ]) record.
 	(((self computeOutgoingAddInvocationForWidget: widget) collect: [ 
 		  :invoc | 
 		  (self searchWidgetFromAddInvocation: invoc for: widget) -> invoc ]) 
@@ -87,8 +97,9 @@ CSNSwingImporter >> computeChildrenOf: widget [
 									                << assocWidgetWithAddInvoc key printString ]) ].
 				               copy ]
 			               ifNil: [ assocWidgetWithAddInvoc key ].
-		widget
+		self addWidgetVisitorClass
 			addWidget: widgetToAdd
+			to: widget
 			withInvocationOfAdd: assocWidgetWithAddInvoc value
 			usingFactory: self factory ]
 ]
@@ -299,8 +310,8 @@ CSNSwingImporter >> postImport [
 { #category : #accessing }
 CSNSwingImporter >> preImport [
 	super preImport.
-	possibleAddInvocationVisitor := self possibleAddInvocationVisitorClass new
-	
+	possibleAddInvocationVisitor := self possibleAddInvocationVisitorClass new.
+	addWidgetVisitor := self addWidgetVisitorClass	 new
 ]
 
 { #category : #'as yet unclassified' }
