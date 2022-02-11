@@ -284,27 +284,16 @@ CSNSwingImporter >> possibleAddInvocationVisitorClass: anObject [
 
 { #category : #api }
 CSNSwingImporter >> postImport [
-	| currentStep maxStep |
-	currentStep := 0.
-	maxStep := 3.
-	'PostImport'
-		displayProgressFrom: 0
-		to: maxStep
-		during: [ :bar | 
-			currentStep := currentStep + 1.
-			bar current: currentStep.
-			bar label: currentStep printString , '/' , maxStep printString , ' for widgets'.
-			self model allCSNWidget do: #postImport displayingProgress: [:wid | 'post import widgets : ', wid name asString ].
-			currentStep := currentStep + 1.
-			bar current: currentStep.
-			bar label: currentStep printString , '/' , maxStep printString , ' for layouts'.
-			self model allCSNLayout do: #postImport displayingProgress: [:wid | 'post import layout : ', wid name asString ].
-			currentStep := currentStep + 1.
-			bar current: currentStep.
-			bar label: currentStep printString , '/' , maxStep printString , ' for pages'.
-			self model allCSNPage do: #postImport displayingProgress: [:wid | 'post import page : ', wid name asString ].
-	]
-	
+
+	self
+		execute: [ self model allCSNWidget do: #postImport ]
+		recordedAs: 'Post import widgets'.
+	self
+		execute: [ self model allCSNLayout do: #postImport ]
+		recordedAs: 'Post import layouts'.
+	self
+		execute: [ self model allCSNPage do: #postImport ]
+		recordedAs: 'Post import pages'
 ]
 
 { #category : #accessing }
