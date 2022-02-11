@@ -1,3 +1,9 @@
+"
+This visitor hold the command to add a widget inside another (for the hierarchy).
+
+First, set the attributes of the command: `widgetToAdd`, `sourceInvocation`, and `factory`.
+Then, visit the container.
+"
 Class {
 	#name : #CSNSwingAddWidgetVisitor,
 	#superclass : #CSNModelVisitor,
