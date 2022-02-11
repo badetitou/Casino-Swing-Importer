@@ -25,6 +25,14 @@ CSNSwingModelImporterVisitor >> visitCSNLBorderLayout: aCSNLBorderLayout [
 ]
 
 { #category : #visiting }
+CSNSwingModelImporterVisitor >> visitCSNLGridLayout: aCSNLGridLayout [
+
+	^ 'GridBagLayout' = source invokedClassName
+		  ifTrue: [ self create: aCSNLGridLayout ]
+		  ifFalse: [ nil ]
+]
+
+{ #category : #visiting }
 CSNSwingModelImporterVisitor >> visitCSNUIButton: aCSNUIButton [
 
 	^ 'JButton' = source invokedClassName
