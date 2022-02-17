@@ -71,8 +71,8 @@ CSNSwingImporter >> computeActionsOf: widget [
 { #category : #private }
 CSNSwingImporter >> computeChildrenOf: widget [
 
-	(String streamContents: [ :stream | 
-		 stream << 'compute child of ' << widget printString ]) record.
+	"(String streamContents: [ :stream | 
+		 stream << 'compute child of ' << widget printString ]) record."
 	(((self computeOutgoingAddInvocationForWidget: widget) collect: [ 
 		  :invoc | 
 		  (self searchWidgetFromAddInvocation: invoc for: widget) -> invoc ]) 
