@@ -166,7 +166,7 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 			((self retrievedLocalCallFlowOf: targetMethod) flatCollect: [ 
 				 :method | 
 				 method queryAllOutgoingInvocations select: [ :invoc | 
-					 invoc receiver isNotNil  ] ]) ].
+					 invoc receiver isNotNil ] ]) ].
 	invocations addAll:
 		(targetMethod classes collect: [ :aFamixJavaClass | 
 			 aFamixJavaClass queryLocalOutgoing: FamixTInvocation ]) flatten.
@@ -184,7 +184,9 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 		(aWidget source sender incomingInvocations
 			 collect: #affectation
 			 thenSelect: #isNotNil) do: [ :variableOfMethodThatCallMe | 
-			invocations addAll: variableOfMethodThatCallMe receivingInvocations ] ]. "Test if the variable is returned"
+			variableOfMethodThatCallMe isNotFound ifFalse: [ 
+				invocations addAll:
+					variableOfMethodThatCallMe receivingInvocations ] ] ]. "Test if the variable is returned"
 	aWidget variable ifNotNil: [ :variable | 
 		invocations addAll: variable receivingInvocations ].
 
