@@ -130,6 +130,7 @@ CSNSwingImporter >> computeLayoutOf: widget [
 CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 
 	| invocations |
+	
 	invocations := self computeOutgoingInvocationForWidget: aWidget.
 	^ (invocations select: [ :receivingInvocation | 
 		   (receivingInvocation sender parentType = aWidget realClass or: [ 
@@ -137,9 +138,9 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 				    source isInvocation not or: [ 
 					    source sender parentType
 					    = receivingInvocation sender parentType ] ] ]) and: [ 
-			   (self possibleAddInvocationVisitor visit: aWidget) anySatisfy: [ 
-				   :keyword | receivingInvocation signature beginsWith: keyword ] ] ])
-		  asSet
+			   self possibleAddInvocationVisitor
+				   is: receivingInvocation
+				   correctForWidget: aWidget ] ]) asSet
 ]
 
 { #category : #private }
