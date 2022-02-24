@@ -3,12 +3,45 @@ Class {
 	#superclass : #CSNWebModel,
 	#instVars : [
 		'possibleAddInvocationVisitor',
+		'possibleAddActionVisitorClass',
 		'possibleAddInvocationVisitorClass',
 		'addWidgetVisitor',
-		'possibleAddWidgetVisitorClass'
+		'possibleAddWidgetVisitorClass',
+		'addActionVisitor'
 	],
 	#category : #'Casino-Swing-Importer'
 }
+
+{ #category : #accessing }
+CSNSwingImporter >> addActionVisitor [
+
+	^ addActionVisitor
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> addActionVisitor: anObject [
+
+	addActionVisitor := anObject
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> addActionVisitorClass [
+
+	^ possibleAddActionVisitorClass ifNil: [ 
+		  possibleAddActionVisitorClass := CSNSwingAddActionVisitor ]
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> addWidgetVisitor [
+
+	^ addWidgetVisitor
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> addWidgetVisitor: anObject [
+
+	addWidgetVisitor := anObject
+]
 
 { #category : #accessing }
 CSNSwingImporter >> addWidgetVisitorClass [
@@ -299,9 +332,13 @@ CSNSwingImporter >> postImport [
 
 { #category : #accessing }
 CSNSwingImporter >> preImport [
+
 	super preImport.
-	possibleAddInvocationVisitor := self possibleAddInvocationVisitorClass new.
-	addWidgetVisitor := self addWidgetVisitorClass	 new
+	possibleAddInvocationVisitor := self
+		                                possibleAddInvocationVisitorClass
+		                                new.
+	addWidgetVisitor := self addWidgetVisitorClass new.
+	addActionVisitor := self addActionVisitorClass new
 ]
 
 { #category : #'as yet unclassified' }
