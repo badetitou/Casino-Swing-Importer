@@ -5,6 +5,16 @@ Class {
 }
 
 { #category : #visiting }
+CSNSwingModelImporterVisitor >> createAttribute: anAttributeClass [
+
+	| createdInstance |
+	createdInstance := (self create: anAttributeClass)
+		                   addSource: source;
+		                   yourself.
+	^ createdInstance
+]
+
+{ #category : #visiting }
 CSNSwingModelImporterVisitor >> createWidget: aWidgetClass [
 
 	| createdInstance |
