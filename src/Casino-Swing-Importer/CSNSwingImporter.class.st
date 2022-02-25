@@ -7,7 +7,8 @@ Class {
 		'possibleAddInvocationVisitorClass',
 		'addWidgetVisitor',
 		'possibleAddWidgetVisitorClass',
-		'addActionVisitor'
+		'addActionVisitor',
+		'outgoingInvocationVisitor'
 	],
 	#category : #'Casino-Swing-Importer'
 }
@@ -163,7 +164,6 @@ CSNSwingImporter >> computeLayoutOf: widget [
 CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 
 	| invocations |
-	
 	invocations := self computeOutgoingInvocationForWidget: aWidget.
 	^ (invocations select: [ :receivingInvocation | 
 		   (receivingInvocation sender parentType = aWidget realClass or: [ 
@@ -181,7 +181,6 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 
 	| invocations exploreLocalMethod targetMethod |
 	invocations := OrderedCollection new.
-
 	targetMethod := (aWidget source class usesTrait: FamixTMethod)
 		                ifTrue: [ aWidget source ]
 		                ifFalse: [ 
@@ -192,7 +191,14 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 						                ifTrue: [ "I look at how I am built instead of my super class" 
 							                aWidget source sender ]
 						                ifFalse: [ aWidget source target first ] ] ].
-	invocations addAll: targetMethod outgoingInvocations.
+	(aWidget source class usesTrait: FamixTParameter)
+		ifTrue: [ "special case if it is a parameter" 
+			invocations addAll: aWidget source receivingInvocations ]
+		ifFalse: [ "general cases"
+			invocations addAll:
+				(targetMethod outgoingInvocations select: [ :invoc | 
+					 invoc receiver isNotNil and: [ 
+						 invoc receiver isImplicitVariable ] ]) ].
 	targetMethod isConstructor ifTrue: [ "I might understand stuff based of parameters of the invocations of the constructor"
 		(aWidget source isKindOf: FamixJavaInvocation) ifTrue: [ 
 			invocations add: aWidget source ].
@@ -200,7 +206,8 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 			((self retrievedLocalCallFlowOf: targetMethod) flatCollect: [ 
 				 :method | 
 				 method queryAllOutgoingInvocations select: [ :invoc | 
-					 invoc receiver isNotNil ] ]) ].
+					 invoc receiver isNotNil and: [ 
+						 invoc receiver isImplicitVariable ] ] ]) ].
 	invocations addAll:
 		(targetMethod classes collect: [ :aFamixJavaClass | 
 			 aFamixJavaClass queryLocalOutgoing: FamixTInvocation ]) flatten.
@@ -231,6 +238,9 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 			(invoc fast receiverOwner isKindOf: FASTJavaMethodInvocation) 
 				ifTrue: [ 
 				invocations add: invoc fast receiverOwner famixInvocation ] ].
+	invocations addAll: (self outgoingInvocationVisitor
+			 additionalInvocationFor: aWidget
+			 withExistingInvocations: invocations).
 	^ invocations flattened asSet
 ]
 
@@ -292,6 +302,23 @@ CSNSwingImporter >> isWidgetReturned: aWidget [
 ]
 
 { #category : #accessing }
+CSNSwingImporter >> outgoingInvocationVisitor [
+
+	^ outgoingInvocationVisitor
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> outgoingInvocationVisitor: anObject [
+
+	outgoingInvocationVisitor := anObject
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> outgoingInvocationVisitorClass [
+	^ CSNSwingSpecialOutgoingInvocationVisitor
+]
+
+{ #category : #accessing }
 CSNSwingImporter >> possibleAddInvocationVisitor [
 
 	^ possibleAddInvocationVisitor
@@ -338,7 +365,8 @@ CSNSwingImporter >> preImport [
 		                                possibleAddInvocationVisitorClass
 		                                new.
 	addWidgetVisitor := self addWidgetVisitorClass new.
-	addActionVisitor := self addActionVisitorClass new
+	addActionVisitor := self addActionVisitorClass new.
+	outgoingInvocationVisitor := self outgoingInvocationVisitorClass new
 ]
 
 { #category : #'as yet unclassified' }
