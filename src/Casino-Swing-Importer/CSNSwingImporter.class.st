@@ -292,11 +292,14 @@ CSNSwingImporter >> isWidgetReturned: aWidget [
 
 	^ (aWidget variable isNotNil and: [ 
 		   aWidget variable fastAccesses anySatisfy: [ :access | "Test if the variable is returned"
-			   (access atAnyScope: { 
-					    FASTJavaReturnStatement.
-					    FASTJavaClassDeclaration.
-					    FASTTBehaviouralEntity }) anyOne isKindOf:
-				   FASTJavaReturnStatement ] ]) or: [ 
+			   ((access atScope: FASTTBehaviouralEntity) isNotEmpty and: [ 
+				    (access atScope: FASTTBehaviouralEntity) anyOne famixMethod
+				    = aWidget source sender ]) and: [ 
+				   (access atAnyScope: { 
+						    FASTJavaReturnStatement.
+						    FASTJavaClassDeclaration.
+						    FASTTBehaviouralEntity }) anyOne isKindOf:
+					   FASTJavaReturnStatement ] ] ]) or: [ 
 		  (aWidget source isKindOf: FamixJavaInvocation) and: [ 
 			  aWidget source isReturned ] ]
 ]
