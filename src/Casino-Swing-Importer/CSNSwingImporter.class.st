@@ -8,7 +8,8 @@ Class {
 		'addWidgetVisitor',
 		'possibleAddWidgetVisitorClass',
 		'addActionVisitor',
-		'outgoingInvocationVisitor'
+		'outgoingInvocationVisitor',
+		'defaultChildrenWidgetsFromInvocationOfWidgetVisitor'
 	],
 	#category : #'Casino-Swing-Importer'
 }
@@ -271,6 +272,11 @@ CSNSwingImporter >> createFactory [
 		           yourself
 ]
 
+{ #category : #accessing }
+CSNSwingImporter >> defaultChildrenWidgetsFromInvocationOfWidgetVisitorClass [
+	^ CSNSwingDefaultChildrenWidgetsFromInvocationOfWidgetVisitor
+]
+
 { #category : #api }
 CSNSwingImporter >> generatePage: aPage [
 	self completeWidget: aPage
@@ -370,7 +376,13 @@ CSNSwingImporter >> preImport [
 		                                new.
 	addWidgetVisitor := self addWidgetVisitorClass new.
 	addActionVisitor := self addActionVisitorClass new.
-	outgoingInvocationVisitor := self outgoingInvocationVisitorClass new
+	outgoingInvocationVisitor := self outgoingInvocationVisitorClass new.
+	defaultChildrenWidgetsFromInvocationOfWidgetVisitor := self
+		                                                       defaultChildrenWidgetsFromInvocationOfWidgetVisitorClass
+		                                                       new
+		                                                       factory:
+			                                                       self factory;
+		                                                       yourself
 ]
 
 { #category : #'as yet unclassified' }
