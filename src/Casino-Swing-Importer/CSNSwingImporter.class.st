@@ -169,10 +169,14 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 	invocations := self computeOutgoingInvocationForWidget: aWidget.
 	^ (invocations select: [ :receivingInvocation | 
 		   (receivingInvocation sender parentType = aWidget realClass or: [ 
-			    aWidget sources anySatisfy: [ :source | 
-				    source isInvocation not or: [ 
-					    source sender parentType
-					    = receivingInvocation sender parentType ] ] ]) and: [ 
+			    (aWidget realClass isNotNil and: [ 
+				     aWidget realClass isAnonymousClass and: [ 
+					     receivingInvocation sender parentType
+					     = aWidget realClass superclass ] ]) or: [ 
+				    aWidget sources anySatisfy: [ :source | 
+					    source isInvocation not or: [ 
+						    source sender parentType
+						    = receivingInvocation sender parentType ] ] ] ]) and: [ 
 			   self possibleAddInvocationVisitor
 				   is: receivingInvocation
 				   correctForWidget: aWidget ] ]) asSet
@@ -209,7 +213,17 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 				 :method | 
 				 method queryAllOutgoingInvocations select: [ :invoc | 
 					 invoc receiver isNotNil and: [ 
-						 invoc receiver isImplicitVariable ] ] ]) ].
+						 invoc receiver isImplicitVariable ] ] ]).
+		"If target method is constructor of anonymous class repeat for anonymous"
+		targetMethod parentType isAnonymousClass ifTrue: [ 
+			targetMethod parentType superclass methods
+				select: [ :m | m isConstructor ]
+				thenDo: [ :superclassConstructor | 
+					invocations addAll: ((self retrievedLocalCallFlowOf: superclassConstructor) 
+						flatCollect: [ :method | 
+							method queryAllOutgoingInvocations select: [ :invoc | 
+								invoc receiver isNotNil and: [ 
+									invoc receiver isImplicitVariable ] ] ]) ] ] ].
 	invocations addAll:
 		(targetMethod classes collect: [ :aFamixJavaClass | 
 			 aFamixJavaClass queryLocalOutgoing: FamixTInvocation ]) flatten.
