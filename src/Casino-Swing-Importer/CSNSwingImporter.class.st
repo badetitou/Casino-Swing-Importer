@@ -9,7 +9,8 @@ Class {
 		'possibleAddWidgetVisitorClass',
 		'addActionVisitor',
 		'outgoingInvocationVisitor',
-		'defaultChildrenWidgetsFromInvocationOfWidgetVisitor'
+		'defaultChildrenWidgetsFromInvocationOfWidgetVisitor',
+		'superAttributeVisitor'
 	],
 	#category : #'Casino-Swing-Importer'
 }
@@ -26,7 +27,7 @@ CSNSwingImporter >> addActionVisitor: anObject [
 	addActionVisitor := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #configuration }
 CSNSwingImporter >> addActionVisitorClass [
 
 	^ possibleAddActionVisitorClass ifNil: [ 
@@ -45,7 +46,7 @@ CSNSwingImporter >> addWidgetVisitor: anObject [
 	addWidgetVisitor := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #configuration }
 CSNSwingImporter >> addWidgetVisitorClass [
 
 	^ possibleAddWidgetVisitorClass ifNil: [ 
@@ -286,7 +287,7 @@ CSNSwingImporter >> createFactory [
 		           yourself
 ]
 
-{ #category : #accessing }
+{ #category : #configuration }
 CSNSwingImporter >> defaultChildrenWidgetsFromInvocationOfWidgetVisitorClass [
 	^ CSNSwingDefaultChildrenWidgetsFromInvocationOfWidgetVisitor
 ]
@@ -337,7 +338,7 @@ CSNSwingImporter >> outgoingInvocationVisitor: anObject [
 	outgoingInvocationVisitor := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #configuration }
 CSNSwingImporter >> outgoingInvocationVisitorClass [
 	^ CSNSwingSpecialOutgoingInvocationVisitor
 ]
@@ -354,7 +355,7 @@ CSNSwingImporter >> possibleAddInvocationVisitor: anObject [
 	possibleAddInvocationVisitor := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #configuration }
 CSNSwingImporter >> possibleAddInvocationVisitorClass [
 
 	^ possibleAddInvocationVisitorClass ifNil: [ 
@@ -381,7 +382,7 @@ CSNSwingImporter >> postImport [
 		recordedAs: 'Post import pages'
 ]
 
-{ #category : #accessing }
+{ #category : #api }
 CSNSwingImporter >> preImport [
 
 	super preImport.
@@ -396,7 +397,10 @@ CSNSwingImporter >> preImport [
 		                                                       new
 		                                                       factory:
 			                                                       self factory;
-		                                                       yourself
+		                                                       yourself.
+	superAttributeVisitor := self superAttributeVisitorClass new
+		                         factory: self factory;
+		                         yourself
 ]
 
 { #category : #'as yet unclassified' }
@@ -480,4 +484,21 @@ CSNSwingImporter >> searchWidgetFromAddInvocation: invocation for: widget2 [
 			          instanciationInvoc.
 		self completeWidget: widget ].
 	^ widget
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> superAttributeVisitor [
+
+	^ superAttributeVisitor
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> superAttributeVisitor: anObject [
+
+	superAttributeVisitor := anObject
+]
+
+{ #category : #configuration }
+CSNSwingImporter >> superAttributeVisitorClass [
+	^ CSNSwingSuperAttributeVisitor
 ]
