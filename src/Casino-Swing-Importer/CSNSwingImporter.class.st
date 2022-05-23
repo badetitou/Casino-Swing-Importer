@@ -10,7 +10,8 @@ Class {
 		'addActionVisitor',
 		'outgoingInvocationVisitor',
 		'defaultChildrenWidgetsFromInvocationOfWidgetVisitor',
-		'superAttributeVisitor'
+		'superAttributeVisitor',
+		'excludedInvocationPath'
 	],
 	#category : #'Casino-Swing-Importer'
 }
@@ -220,11 +221,12 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 			targetMethod parentType superclass methods
 				select: [ :m | m isConstructor ]
 				thenDo: [ :superclassConstructor | 
-					invocations addAll: ((self retrievedLocalCallFlowOf: superclassConstructor) 
-						flatCollect: [ :method | 
-							method queryAllOutgoingInvocations select: [ :invoc | 
-								invoc receiver isNotNil and: [ 
-									invoc receiver isImplicitVariable ] ] ]) ] ] ].
+					invocations addAll:
+						((self retrievedLocalCallFlowOf: superclassConstructor) 
+							 flatCollect: [ :method | 
+								 method queryAllOutgoingInvocations select: [ :invoc | 
+									 invoc receiver isNotNil and: [ 
+										 invoc receiver isImplicitVariable ] ] ]) ] ] ].
 	invocations addAll:
 		(targetMethod classes collect: [ :aFamixJavaClass | 
 			 aFamixJavaClass queryLocalOutgoing: FamixTInvocation ]) flatten.
@@ -258,7 +260,11 @@ CSNSwingImporter >> computeOutgoingInvocationForWidget: aWidget [
 	invocations addAll: (self outgoingInvocationVisitor
 			 additionalInvocationFor: aWidget
 			 withExistingInvocations: invocations).
-	^ invocations flattened asSet
+	invocations := invocations flattened asSet.
+	self excludedInvocationPath ifNil: [ ^ invocations ].
+	^ invocations reject: [ :invoc | 
+		  invoc sourceAnchor fileName includesSubstring:
+			  self excludedInvocationPath ]
 ]
 
 { #category : #api }
@@ -290,6 +296,18 @@ CSNSwingImporter >> createFactory [
 { #category : #configuration }
 CSNSwingImporter >> defaultChildrenWidgetsFromInvocationOfWidgetVisitorClass [
 	^ CSNSwingDefaultChildrenWidgetsFromInvocationOfWidgetVisitor
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> excludedInvocationPath [
+
+	^ excludedInvocationPath
+]
+
+{ #category : #accessing }
+CSNSwingImporter >> excludedInvocationPath: aPathString [
+
+	excludedInvocationPath := aPathString
 ]
 
 { #category : #api }
