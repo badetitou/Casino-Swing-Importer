@@ -144,24 +144,25 @@ CSNSwingImporter >> computeChildrenOf: widget [
 CSNSwingImporter >> computeLayoutOf: widget [
 
 	| invocations |
-	invocations := self computeOutgoingInvocationForWidget: widget.
+	widget isContainer ifTrue: [ 
+		invocations := self computeOutgoingInvocationForWidget: widget.
 
-	invocations
-		select: [ :receivingInvocation | 
-			#( 'setLayout' ) anySatisfy: [ :keyword | 
-				receivingInvocation signature beginsWith: keyword ] ]
-		thenDo: [ :invoc | 
-			| constructorInvoc argument |
-			invoc sender generateFastIfNotDoneAndBind.
-			argument := invoc fast arguments first.
-			constructorInvoc := argument famixInvocation ifNil: [ 
-				                    argument famixVariable
-					                    ifNotNil: [ :famixVariable | 
-					                    famixVariable declaredType ]
-					                    ifNil: [ nil ] ].
-			constructorInvoc ifNotNil: [ 
-				widget layout:
-					(self factory createLayoutFor: constructorInvoc withParent: nil) ] ]
+		invocations
+			select: [ :receivingInvocation | 
+				#( 'setLayout' ) anySatisfy: [ :keyword | 
+					receivingInvocation signature beginsWith: keyword ] ]
+			thenDo: [ :invoc | 
+				| constructorInvoc argument |
+				invoc sender generateFastIfNotDoneAndBind.
+				argument := invoc fast arguments first.
+				constructorInvoc := argument famixInvocation ifNil: [ 
+					                    argument famixVariable
+						                    ifNotNil: [ :famixVariable | 
+						                    famixVariable declaredType ]
+						                    ifNil: [ nil ] ].
+				constructorInvoc ifNotNil: [ 
+					widget layout:
+						(self factory createLayoutFor: constructorInvoc withParent: nil) ] ] ]
 ]
 
 { #category : #private }
