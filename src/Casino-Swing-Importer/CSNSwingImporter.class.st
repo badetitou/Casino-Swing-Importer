@@ -173,9 +173,8 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 	^ (invocations select: [ :receivingInvocation | 
 		   (receivingInvocation sender parentType = aWidget realClass or: [ 
 			    (aWidget realClass isNotNil and: [ 
-				     aWidget realClass isAnonymousClass and: [ 
-					     receivingInvocation sender parentType
-					     = aWidget realClass superclass ] ]) or: [ 
+				     receivingInvocation sender parentType
+				     = aWidget realClass superclass ]) or: [ 
 				    aWidget sources anySatisfy: [ :source | 
 					    source isInvocation not or: [ 
 						    source sender parentType
@@ -434,7 +433,8 @@ CSNSwingImporter >> retrievedLocalCallFlowOf: aFamixJavaMethod [
 				 method queryAllOutgoingInvocations
 					 collect: [ :invoc | invoc target anyOne ]
 					 thenSelect: [ :invoc | 
-					 invoc parentType = aFamixJavaMethod parentType ] ]) ].
+						 aFamixJavaMethod parentType withSuperclassHierarchy includes:
+							 invoc parentType ] ]) ].
 	^ methods
 ]
 
