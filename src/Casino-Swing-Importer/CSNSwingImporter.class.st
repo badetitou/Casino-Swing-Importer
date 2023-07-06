@@ -71,10 +71,12 @@ CSNSwingImporter >> computeActionsOf: widget [
 	invocations := self computeOutgoingInvocationForWidget: widget.
 	addActionsListenersInvocations := invocations select: [ 
 		                                  :receivingInvocation | 
-		                                  #( 'addActionListener' ) 
-			                                  anySatisfy: [ :keyword | 
-			                                  receivingInvocation signature 
-				                                  beginsWith: keyword ] ].
+		                                  receivingInvocation parameters
+			                                  isNotEmpty and: [ 
+			                                  #( 'addActionListener' ) 
+				                                  anySatisfy: [ :keyword | 
+				                                  receivingInvocation signature 
+					                                  beginsWith: keyword ] ] ].
 	addActionsListenersInvocations do: [ :addActionsListenersInvocation | 
 		| invocationArgument listenerClass methodCalled |
 		addActionsListenersInvocation sender generateFastIfNotDoneAndBind.
