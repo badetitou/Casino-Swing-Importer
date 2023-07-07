@@ -175,8 +175,8 @@ CSNSwingImporter >> computeOutgoingAddInvocationForWidget: aWidget [
 	^ (invocations select: [ :receivingInvocation | 
 		   (receivingInvocation sender parentType = aWidget realClass or: [ 
 			    (aWidget realClass isNotNil and: [ 
-				     receivingInvocation sender parentType
-				     = aWidget realClass superclass ]) or: [ 
+				     aWidget realClass withSuperclassHierarchy includes:
+					     receivingInvocation sender parentType ]) or: [ 
 				    aWidget sources anySatisfy: [ :source | 
 					    source isInvocation not or: [ 
 						    source sender parentType
